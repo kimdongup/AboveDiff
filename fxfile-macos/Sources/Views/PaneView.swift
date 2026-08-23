@@ -146,9 +146,11 @@ public struct PaneView: View {
             Rectangle()
                 .stroke(isActive ? Color.accentColor : Color.clear, lineWidth: 1.5)
         )
-        .onTapGesture {
-            appState.activePaneIndex = paneIndex
-        }
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                appState.activePaneIndex = paneIndex
+            }
+        )
     }
     
     // MARK: - Breadcrumbs Bar

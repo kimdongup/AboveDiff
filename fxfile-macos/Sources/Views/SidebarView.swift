@@ -71,7 +71,9 @@ public struct SidebarView: View {
                                     .font(.system(size: 10))
                                     .foregroundColor(.secondary)
                             }
+                            Spacer()
                         }
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
@@ -92,11 +94,11 @@ public struct SidebarView: View {
                                 Text(bookmark.name)
                                     .font(.system(size: 13))
                                     .lineLimit(1)
+                                Spacer()
                             }
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                        
-                        Spacer()
                     }
                     .contextMenu {
                         Button("Remove Bookmark", role: .destructive) {
@@ -114,7 +116,9 @@ public struct SidebarView: View {
                             .font(.caption)
                         Text(L10n("sidebar.add_bookmark"))
                             .font(.caption)
+                        Spacer()
                     }
+                    .contentShape(Rectangle())
                     .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
@@ -141,7 +145,9 @@ public struct SidebarView: View {
                 Text(title)
                     .font(.system(size: 13))
                     .lineLimit(1)
+                Spacer()
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
