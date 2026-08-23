@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Swift / Xcode / SPM
+.build/
+.swiftpm/
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata/
+DerivedData/
+
+# App Bundles & Build artifacts
+dist/fxfile.app/
+bin/
+obj/
+
+# Logs & Temp
+*.log
+*.tmp
+fxfile_opt_tests_*
+fxfile_fs_tests_*
+fxfile_test_*
