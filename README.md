@@ -1,7 +1,7 @@
 # fxfile (flyExplorer)
 
 <p align="center">
-  <b>Professional Multi-Tab & Dual-Pane File Manager for macOS & Windows</b>
+  <b>Professional Multi-Tab & Dual-Pane File Manager for macOS</b>
 </p>
 
 ---
