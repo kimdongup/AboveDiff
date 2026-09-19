@@ -1,40 +1,40 @@
 # MELD_INTEGRATION_PLAN02.md
 
-## 0. Scope
+## 0. 범위
 
-This document is the **P3~P4** implementation plan that follows P0~P2.
+이 문서는 P0~P2 완료 후 진행하는 **P3~P4** 구현 계획이다.
 
 - P3: Editable Diff + Save + Undo/Redo + Change Block Apply
 - P4: Filters + Ignore Blank Lines + Sync Points + Performance Hardening
 
-Baseline:
-- P0~P2 tests pass
-- Keep the UI → State → Core dependency direction
-- `AboveDiffCore` must not depend on SwiftUI/AppKit
-- Views must not perform filesystem or merge logic directly
+기준:
+- P0~P2 테스트 통과
+- UI → State → Core 의존 방향 유지
+- `AboveDiffCore`는 SwiftUI/AppKit 비의존
+- View에서 파일 시스템/merge 로직 직접 수행 금지
 
 ---
 
-# 1. P3 Goal
+# 1. P3 목표
 
-The P2 File Diff is read-only.
+현재 P2의 File Diff는 read-only이다.
 
-P3 adds the following.
+P3에서 다음을 추가한다.
 
-1. Left/right documents are editable
-2. Save changes
+1. 좌/우 문서 편집 가능
+2. 변경 내용 저장
 3. Undo / Redo
-4. Apply change blocks left→right / right→left
-5. Select and move the current change block
-6. Dirty state indicator
-7. Foundation for detecting external changes before save
-8. Debounced diff recalculation
+4. Change block 단위 좌→우 / 우→좌 적용
+5. 현재 change block 선택 및 이동
+6. dirty state 표시
+7. 저장 전 외부 변경 감지 기반 마련
+8. diff 재계산 debounce
 
-The core of P3 is separating the "edit UI" from "merge apply logic".
+P3의 핵심은 "편집 UI"와 "merge 적용 로직"을 분리하는 것이다.
 
 ---
 
-# 2. P3 Architecture
+# 2. P3 아키텍처
 
 ```text
 Views
@@ -53,15 +53,15 @@ Core
   └─ TextDocumentService
 ```
 
-Notes:
-- NSTextView edit events originate in the View,
-  but document content is applied to state through `EditableFileDiffState`.
-- Change block copy/replace is handled as strings by Core `DiffEditEngine`.
-- Views must not compute String ranges.
+주의:
+- NSTextView 편집 이벤트는 View에서 발생하지만,
+  실제 문서 내용 state 반영은 `EditableFileDiffState`를 통해 수행한다.
+- change block copy/replace는 Core `DiffEditEngine`이 문자열 단위로 처리한다.
+- View에서 String range 계산 금지.
 
 ---
 
-# 3. P3 Core New Files
+# 3. P3 Core 신규 파일
 
 ## 3.1 `DiffEditOperation.swift`
 
@@ -87,15 +87,15 @@ public struct DiffEditOperation: Sendable {
 
 ## 3.2 `DiffEditEngine.swift`
 
-Responsibilities:
-- current `DiffResult`
-- current left/right text
-- selected chunk
-- apply direction
+책임:
+- 현재 `DiffResult`
+- 현재 left/right text
+- 선택 chunk
+- 적용 방향
 
-Take those as input and return new text.
+을 입력받아 새 text를 반환.
 
-API example:
+API 예:
 
 ```swift
 public protocol DiffEditing: Sendable {
@@ -108,7 +108,7 @@ public protocol DiffEditing: Sendable {
 }
 ```
 
-Output:
+출력:
 
 ```swift
 public struct DiffEditResult: Sendable {
@@ -117,34 +117,34 @@ public struct DiffEditResult: Sendable {
 }
 ```
 
-Important:
-- Independent of NSTextView ranges
-- Line-range based
-- No UI callbacks
+중요:
+- NSTextView range와 무관
+- line range 기반
+- UI callback 없음
 
 ---
 
 ## 3.3 `TextDocumentService.swift`
 
-Responsibilities:
+책임:
 - text load
 - encoding detect
 - save
 - atomic write
 - optional backup
-- modification timestamp lookup
+- modification timestamp 조회
 
-Move P2 `FileDiffState.readText()` here.
+P2의 `FileDiffState.readText()`를 여기로 이동.
 
-This keeps State from calling Data(contentsOf:) directly.
+이렇게 하면 State가 직접 Data(contentsOf:)를 하지 않는다.
 
 ---
 
 # 4. P3 State
 
-## New `EditableFileDiffState.swift`
+## 신규 `EditableFileDiffState.swift`
 
-State:
+상태:
 
 ```text
 leftURL
@@ -168,7 +168,7 @@ isReDiffing
 errorMessage
 ```
 
-Commands:
+명령:
 
 ```text
 load()
@@ -187,9 +187,9 @@ previousChange()
 ```
 
 Undo/Redo:
-- Use the native undo manager of AppKit NSTextView
-- State does not implement its own undo stack
-- After undo/redo, pass the changed text to State so the diff recalculates
+- AppKit NSTextView의 native undo manager를 사용
+- State는 undo stack을 직접 구현하지 않는다
+- 단, undo/redo 후 변경 text를 State로 전달하여 diff 재계산
 
 ---
 
@@ -197,16 +197,16 @@ Undo/Redo:
 
 ## 5.1 `EditableDiffTextPane.swift`
 
-Replace P2 `DiffTextPane`.
+P2 `DiffTextPane` 교체.
 
-Requirements:
+요구:
 - `NSTextView.isEditable = true`
 - text change delegate
 - native undoManager
 - line highlighting
 - current chunk scroll
 - monospaced font
-- keep the find bar
+- find bar 유지
 
 View → State callback:
 
@@ -218,9 +218,9 @@ onTextChanged: (String) -> Void
 
 ## 5.2 `DiffActionGutter.swift`
 
-Meld-style center action gutter.
+Meld 스타일 중앙 action gutter.
 
-2-way layout:
+2-way 기준:
 
 ```text
 LEFT      GUTTER      RIGHT
@@ -230,19 +230,19 @@ BBB       →  ←         CCC
 DDD                    DDD
 ```
 
-Buttons:
+버튼:
 - Left → Right
 - Right → Left
 
-Show actions at the current chunk position.
+현재 chunk 위치에 action 표시.
 
-P3 handles delete-only chunks through the same API.
+P3에서는 delete-only chunk도 동일 API로 처리.
 
 ---
 
 ## 5.3 `FileDiffView.swift`
 
-Add a top toolbar:
+상단 toolbar 추가:
 
 ```text
 Save Left
@@ -256,21 +256,21 @@ Previous
 Next
 ```
 
-Dirty indicator:
+dirty 표시:
 
 ```text
 ● file.swift
 ```
 
-Or `*` in the title.
+또는 title에 `*`.
 
 ---
 
-# 6. P3 Re-diff Strategy
+# 6. P3 Re-diff 전략
 
-Running a full diff on every keystroke is inefficient.
+문자 입력마다 즉시 전체 diff를 수행하면 비효율적이다.
 
-Debounce in State:
+State에서 debounce:
 
 ```text
 text change
@@ -282,35 +282,35 @@ background diff
 MainActor result update
 ```
 
-Initial value:
+초기값:
 - 300ms
 
-For very large files:
-- Incremental diff is possible later
-- P3 starts with full re-diff
+파일이 매우 큰 경우:
+- 향후 incremental diff 가능
+- P3에서는 full re-diff로 시작
 
 ---
 
-# 7. P3 Save Strategy
+# 7. P3 저장 전략
 
-Defaults:
+기본:
 - atomic write
-- Preserve the original encoding as much as possible
-- On failure, keep the existing file
+- 기존 encoding 최대한 유지
+- 실패 시 기존 파일 보존
 
-Initial P3:
+초기 P3:
 - UTF-8/UTF-16/Latin-1 load
-- Save keeps the loaded encoding
-- If that is impossible, raise an explicit error
+- 저장은 loaded encoding 유지
+- 불가능하면 명시적 error
 
-After P4:
-- Consider an encoding selector
+P4 이후:
+- encoding selector 검토
 
 ---
 
-# 8. P3 Tests
+# 8. P3 테스트
 
-New:
+신규:
 
 ```text
 DiffEditEngineTests.swift
@@ -318,7 +318,7 @@ TextDocumentServiceTests.swift
 EditableFileDiffStateTests.swift
 ```
 
-Required:
+필수:
 - insert chunk left→right
 - insert chunk right→left
 - delete chunk apply
@@ -334,26 +334,26 @@ Required:
 
 ---
 
-# 9. P4 Goal
+# 9. P4 목표
 
-Add the comparison options that determine real-world usability.
+Meld의 실사용성을 좌우하는 비교 옵션을 추가한다.
 
 1. ignore blank lines
 2. text regex filters
 3. file/folder filters
 4. sync points
 5. large-file performance
-6. improved binary handling
+6. binary handling 개선
 7. compare cancellation
 8. cache
 
 ---
 
-# 10. P4 Core New/Extended Files
+# 10. P4 Core 신규/확장
 
 ## 10.1 `TextNormalizer.swift`
 
-Responsibilities:
+책임:
 - line ending normalize
 - ignore blank lines
 - optional whitespace normalization
@@ -370,8 +370,8 @@ public protocol TextNormalizing: Sendable {
 }
 ```
 
-Important:
-Keep the original text and the normalized line mapping together.
+중요:
+원본 text와 normalized line mapping을 같이 유지해야 한다.
 
 ```text
 normalized line
@@ -379,7 +379,7 @@ normalized line
 original line
 ```
 
-That keeps UI highlights accurate.
+그래야 UI highlight가 정확하다.
 
 ---
 
@@ -393,8 +393,8 @@ public struct RegexTextFilter: Sendable, Hashable {
 }
 ```
 
-In P4:
-- regex remove/replace
+P4에서는:
+- regex 제거/치환
 - filter enable/disable
 - invalid regex validation
 
@@ -402,13 +402,13 @@ In P4:
 
 ## 10.3 Directory filter
 
-Extend:
+확장:
 
 ```swift
 DirectoryCompareOptions
 ```
 
-Add:
+추가:
 - filename include glob
 - filename exclude glob
 - regex
@@ -418,7 +418,7 @@ Add:
 
 ## 10.4 Sync Points
 
-The user manually maps specific left/right lines.
+사용자가 좌/우 특정 라인을 수동으로 대응시킴.
 
 Core:
 
@@ -435,7 +435,7 @@ public struct DiffSyncPoint: Sendable, Hashable {
 var syncPoints: [DiffSyncPoint]
 ```
 
-The engine diffs each segment, then concatenates.
+엔진은 구간별 diff 수행 후 concatenate.
 
 ---
 
@@ -443,11 +443,11 @@ The engine diffs each segment, then concatenates.
 
 ## 11.1 Cancellation
 
-Long directory compare / diff runs must be cancellable.
+긴 directory compare / diff는 cancel 가능해야 함.
 
-Pass Foundation Task cancellation into the Core API.
+Foundation Task cancellation을 Core API에 전달.
 
-Initial:
+초기:
 - periodic `Task.isCancelled`
 
 ## 11.2 Cache
@@ -471,20 +471,20 @@ options hash
 
 ## 11.3 Large file guard
 
-Examples:
-- text 10 MB or larger
-- 100k lines or more
+예:
+- 10 MB 이상 텍스트
+- 100k lines 이상
 
-Then:
-- minimize syntax highlighting
-- downsample the overview map
-- show a diff warning
+시:
+- syntax highlighting 최소화
+- overview map downsample
+- diff warning 표시
 
 ---
 
 # 12. P4 State/View
 
-State options:
+State 옵션:
 
 ```text
 ignoreBlankLines
@@ -497,11 +497,11 @@ View:
 - filter list editor
 - sync point add/remove
 
-The UI must not run Core regex itself.
+UI는 Core regex 직접 실행 금지.
 
 ---
 
-# 13. P3~P4 File Structure
+# 13. P3~P4 파일 구조
 
 ```text
 Sources/Core/Diff/
@@ -529,16 +529,16 @@ Sources/Views/Compare/
 
 # 14. P3 Definition of Done
 
-- [ ] left/right editing
+- [ ] 좌/우 편집 가능
 - [ ] native Undo/Redo
 - [ ] Save Left/Right/All
 - [ ] dirty state
 - [ ] change block left→right
 - [ ] change block right→left
-- [ ] automatic re-diff after applying a change
-- [ ] no string merge logic in View
-- [ ] no SwiftUI/AppKit import in Core
-- [ ] related unit tests pass
+- [ ] change 적용 후 자동 re-diff
+- [ ] View에서 문자열 merge 로직 없음
+- [ ] Core에서 SwiftUI/AppKit import 없음
+- [ ] 관련 unit tests 통과
 
 ---
 
@@ -546,18 +546,18 @@ Sources/Views/Compare/
 
 - [ ] ignore blank lines
 - [ ] regex text filters
-- [ ] invalid regex handling
+- [ ] invalid regex 처리
 - [ ] filename filters
 - [ ] sync points
 - [ ] cancellation
 - [ ] large-file guard
 - [ ] cache
 - [ ] filter/sync point unit tests
-- [ ] no P0~P3 regression
+- [ ] 기존 P0~P3 regression 없음
 
 ---
 
-# 16. Implementation Order
+# 16. 구현 순서
 
 P3:
 
@@ -567,7 +567,7 @@ P3:
 4. `EditableFileDiffState.swift`
 5. `EditableDiffTextPane.swift`
 6. `DiffActionGutter.swift`
-7. Replace `FileDiffView.swift`
+7. `FileDiffView.swift` 교체
 8. tests
 
 P4:
@@ -575,34 +575,34 @@ P4:
 1. `TextNormalizer.swift`
 2. `DiffFilter.swift`
 3. `DiffSyncPoint.swift`
-4. Extend `DiffEngine` options
-5. Extend `DirectoryCompareOptions` filters
-6. Add State options
+4. `DiffEngine` 옵션 확장
+5. `DirectoryCompareOptions` 필터 확장
+6. State 옵션 추가
 7. Diff Options UI
 8. cancellation/cache/large-file guard
 9. tests
 
 ---
 
-# 17. Branch
+# 17. 브랜치
 
-Recommended:
+권장:
 
 ```text
 feature/meld-p3-p4
 ```
 
-Intermediate commit when P3 is complete:
+P3 완료 시 중간 commit:
 
 ```text
 feat(diff): add editable two-way diff and block apply
 ```
 
-When P4 is complete:
+P4 완료 시:
 
 ```text
 feat(diff): add filters sync points and performance controls
 ```
 
-After P4, dedicated to P5~P6:
+P4 완료 후 P5~P6 전용:
 - `MELD_INTEGRATION_PLAN03.md`

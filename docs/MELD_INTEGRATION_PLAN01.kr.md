@@ -1,27 +1,27 @@
 # MELD_INTEGRATION_PLAN01.md
 
-## 0. Purpose
+## 0. 목적
 
-This document is the P0~P2 execution plan for absorbing Meld's core comparison features into the `AboveDiff` macOS native app using a **native Swift/SwiftUI/AppKit architecture**.
+이 문서는 `AboveDiff` macOS 네이티브 앱에 Meld의 핵심 비교 기능을 **Swift/SwiftUI/AppKit 네이티브 구조로 흡수**하기 위한 P0~P2 실행 계획이다.
 
-Target repository:
+대상 저장소:
 - `kimdongup/AboveDiff`
-- Base branch: `main`
-- Working branch: `feature/meld-p0-p2`
+- 기준 브랜치: `main`
+- 작업 브랜치: `feature/meld-p0-p2`
 
-Scope of this plan:
-- P0: Layer-separate compare/sync logic and clean up the current DirectorySync
+이번 계획의 범위:
+- P0: 비교/동기화 로직의 계층 분리 및 현재 DirectorySync 정리
 - P1: 2-way Folder Compare
 - P2: 2-way File Diff read-only
-- Write P3~P8 as follow-on plans starting with `MELD_INTEGRATION_PLAN02.md` after P0~P2 is complete and verified
+- P3~P8은 P0~P2 완료/검증 후 `MELD_INTEGRATION_PLAN02.md`부터 후속 계획으로 작성
 
 ---
 
-## 1. Highest-priority architecture principles
+## 1. 최우선 아키텍처 원칙
 
-### 1.1 Enforce UI/logic separation
+### 1.1 UI와 로직의 강제 분리
 
-Dependency direction must be one-way only.
+의존 방향은 반드시 아래 한 방향만 허용한다.
 
 ```text
 Views
@@ -31,66 +31,66 @@ State / ViewModel
 Core
 ```
 
-Forbidden:
+금지:
 
 ```text
-Views → Core Engine direct call
+Views → Core Engine 직접 호출
 Core → SwiftUI
 Core → AppKit
-Core → View/Window state reference
+Core → View/Window 상태 참조
 ```
 
-### 1.2 Module responsibilities
+### 1.2 모듈별 책임
 
 #### Core
-Pure logic layer.
+순수 로직 계층.
 
-Allowed:
+허용:
 - Foundation
-- file I/O
-- diff/merge algorithms
-- comparison result models
-- filters/normalization
-- sync plan generation/execution
+- 파일 입출력
+- diff/merge 알고리즘
+- 비교 결과 모델
+- 필터/정규화
+- 동기화 plan 생성/실행
 
-Forbidden:
+금지:
 - SwiftUI
 - AppKit
 - `@Published`
-- screen colors/copy
-- sheet/window handling
+- 화면 색상/문구
+- sheet/window 처리
 
 #### State
-Screen state and Core orchestration.
+화면 상태 및 Core orchestration.
 
-Responsibilities:
-- Core engine invocation
-- async task lifetime
+책임:
+- Core 엔진 호출
+- async task 수명
 - progress
 - selection
 - filter state
 - compare session
-- error-presentation state
+- error presentation용 상태
 
 #### Views
-Presentation only.
+표현 전용.
 
-Responsibilities:
-- forward user input
-- observe State
-- render results
+책임:
+- 사용자 입력 전달
+- State 관찰
+- 결과 렌더링
 
-Forbidden:
-- compare files directly
-- compute checksums directly
-- generate diffs directly
-- call Core singletons such as `DirectorySyncEngine.shared` directly
+금지:
+- 직접 파일 비교
+- 직접 checksum 계산
+- 직접 diff 생성
+- `DirectorySyncEngine.shared` 등 Core singleton 직접 호출
 
 ---
 
-## 2. Current-code analysis summary
+## 2. 현재 코드 분석 요약
 
-### 2.1 Current macOS structure
+### 2.1 현재 macOS 구조
 
 ```text
 AboveDiff-macos/
@@ -120,50 +120,50 @@ AboveDiff-macos/
     └── StateTests.swift
 ```
 
-### 2.2 Structural problems found
+### 2.2 현재 발견된 구조적 문제
 
-`DirectorySyncSheet.swift` currently performs the following directly inside UI code.
+`DirectorySyncSheet.swift`가 UI 코드 안에서 다음을 직접 수행한다.
 
 ```swift
 DirectorySyncEngine.shared.compareDirectories(...)
 DirectorySyncEngine.shared.executeSync(...)
 ```
 
-This tightly couples UI and logic as Diff/Merge grows.
+이는 앞으로 Diff/Merge 기능이 커질 때 UI와 로직의 결합도를 크게 높인다.
 
-Remove this direct dependency in P0.
+P0에서 이 직접 의존을 제거한다.
 
-### 2.3 Comparison limits of the existing DirectorySyncEngine
+### 2.3 기존 DirectorySyncEngine의 비교 한계
 
-The current equality check is roughly the following condition.
+현재 동일 판정 핵심은 대략 다음 조건이다.
 
 ```swift
 abs(mtime difference) < 2 seconds && size equal
 ```
 
-Therefore:
-- files can be `.equal` when size and mtime match even if content differs
-- `compareChecksum` exists but is not used enough in the actual decision
-- no binary/text distinction
-- no blank-line/text filters
-- content compare mode is not explicitly separated
+따라서:
+- 내용이 달라도 크기와 mtime이 같으면 `.equal` 가능
+- `compareChecksum` 파라미터가 존재하지만 실제 판정에 충분히 사용되지 않음
+- binary/text 구분 없음
+- blank-line/text filter 없음
+- content compare mode가 명시적으로 분리되어 있지 않음
 
-Separate comparison policy in P0.
-
----
-
-# P0 — Compare/Sync Core cleanup
-
-## 3. Goals
-
-1. Fully separate the existing `DirectorySyncEngine` from the UI.
-2. Separate "compare" from "sync execution".
-3. Split file-comparison policy into explicit types.
-4. Make later Meld-style Folder Compare and File Diff share common types.
+P0에서 비교 정책을 분리한다.
 
 ---
 
-## 4. P0 new structure
+# P0 — Compare/Sync Core 정리
+
+## 3. 목표
+
+1. 기존 `DirectorySyncEngine`을 UI에서 완전히 분리한다.
+2. "비교"와 "동기화 실행"을 분리한다.
+3. 파일 비교 정책을 명시적 타입으로 분리한다.
+4. 추후 Meld 스타일 Folder Compare와 File Diff가 공통 타입을 공유할 수 있게 만든다.
+
+---
+
+## 4. P0 신규 구조
 
 ```text
 Sources/Core/
@@ -202,14 +202,14 @@ Sources/Views/
     └── FolderCompareView.swift
 ```
 
-Do not delete the existing `DirectorySyncSheet` in P0.
-Keep compatibility, route through the State layer, and replace the UI in P1.
+P0에서는 기존 `DirectorySyncSheet`를 즉시 삭제하지 않는다.
+호환을 유지한 상태에서 State 계층을 거치도록 바꾸고 P1에서 UI를 교체한다.
 
 ---
 
-## 5. P0 per-file work
+## 5. P0 파일별 작업
 
-### 5.1 New `FileComparisonMode.swift`
+### 5.1 신규 `FileComparisonMode.swift`
 
 ```swift
 public enum FileComparisonMode: Sendable {
@@ -219,29 +219,29 @@ public enum FileComparisonMode: Sendable {
 }
 ```
 
-Definitions:
+정의:
 
 - `metadata`
   - size + mtime
-  - fastest
+  - 가장 빠름
 - `content`
-  - actual byte comparison
-  - ignore mtime
+  - 실제 byte 비교
+  - mtime 무시
 - `smart`
   - metadata quick reject
-  - content compare when metadata is inconclusive
+  - 애매한 경우 content compare
 
-Default is `.smart`.
+기본값은 `.smart`.
 
-### 5.2 New `FileContentComparator.swift`
+### 5.2 신규 `FileContentComparator.swift`
 
-Responsibilities:
+책임:
 - chunked byte comparison
 - binary detection
 - optional normalized text comparison
-- later extension for ignore blank lines / text filters
+- 향후 ignore blank lines / text filter 확장
 
-Initial API:
+초기 API:
 
 ```swift
 public protocol FileContentComparing: Sendable {
@@ -253,30 +253,30 @@ public protocol FileContentComparing: Sendable {
 }
 ```
 
-### 5.3 New `DirectoryCompareEngine.swift`
+### 5.3 신규 `DirectoryCompareEngine.swift`
 
-Compare only.
+비교 전용.
 
-Forbidden:
+금지:
 - copy
 - move
 - delete
 
-Input:
+입력:
 
 ```swift
 DirectoryCompareRequest
 ```
 
-Output:
+출력:
 
 ```swift
 [DirectoryCompareItem]
 ```
 
-### 5.4 New `DirectorySyncPlanner.swift`
+### 5.4 신규 `DirectorySyncPlanner.swift`
 
-Generate an execution plan from compare results.
+비교 결과에서 실행 계획을 생성.
 
 ```text
 Compare result
@@ -286,27 +286,27 @@ Sync policy
 SyncPlan
 ```
 
-Separate comparison from policy.
+비교와 정책을 분리한다.
 
-### 5.5 New `DirectorySyncExecutor.swift`
+### 5.5 신규 `DirectorySyncExecutor.swift`
 
-Accept only a `SyncPlan` and perform the actual file operations.
+`SyncPlan`만 받아 실제 파일 작업 수행.
 
-### 5.6 Existing `DirectorySyncEngine.swift`
+### 5.6 기존 `DirectorySyncEngine.swift`
 
-Keep as a facade during P0.
+P0 동안 facade로 유지.
 
 ```swift
 @available(*, deprecated, message: "Use DirectoryCompareEngine + DirectorySyncPlanner + DirectorySyncExecutor")
 ```
 
-Migrate incrementally without breaking existing tests.
+기존 테스트를 깨지 않고 점진적으로 이전한다.
 
-### 5.7 New `DirectoryCompareState.swift`
+### 5.7 신규 `DirectoryCompareState.swift`
 
 `@MainActor ObservableObject`
 
-Responsibilities:
+책임:
 - sourceURL
 - targetURL
 - options
@@ -317,20 +317,20 @@ Responsibilities:
 - error
 - loading state
 
-Views use only this State.
+View는 이 State만 사용한다.
 
 ### 5.8 `DirectorySyncSheet.swift`
 
-P0 changes:
-- gradually remove Core imports
-- dispatch commands to `DirectoryCompareState`
-- do not call the Core Engine directly
+P0 변경:
+- Core import를 점차 제거
+- `DirectoryCompareState`에 명령 전달
+- Core Engine 직접 호출 금지
 
 ---
 
-## 6. P0 tests
+## 6. P0 테스트
 
-New:
+신규:
 
 ```text
 Tests/AboveDiffTests/
@@ -340,7 +340,7 @@ Tests/AboveDiffTests/
 └── DirectorySyncExecutorTests.swift
 ```
 
-Required cases:
+필수 케이스:
 - same size + same mtime + different content
 - same content + different mtime
 - empty files
@@ -356,17 +356,17 @@ Required cases:
 - metadata mode
 - content mode
 
-Keep existing `DirectorySyncTests.swift` as a facade compatibility test, then shrink it later.
+기존 `DirectorySyncTests.swift`는 facade compatibility test로 유지 후 차후 축소.
 
 ---
 
 # P1 — 2-way Folder Compare
 
-## 7. Goals
+## 7. 목표
 
-Integrate Meld-style folder comparison into AboveDiff's dual-pane workflow.
+Meld 스타일의 폴더 비교 기능을 AboveDiff의 dual-pane workflow에 통합한다.
 
-Default input:
+입력 기본값:
 
 ```text
 leftPane.currentURL ↔ rightPane.currentURL
@@ -374,7 +374,7 @@ leftPane.currentURL ↔ rightPane.currentURL
 
 ---
 
-## 8. P1 user flow
+## 8. P1 사용자 흐름
 
 Toolbar:
 
@@ -382,7 +382,7 @@ Toolbar:
 Compare Panes
 ```
 
-Menu:
+메뉴:
 
 ```text
 Tools
@@ -391,7 +391,7 @@ Tools
      └─ Compare Selected Files
 ```
 
-Folder compare screen:
+폴더 비교 화면:
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
@@ -405,7 +405,7 @@ Folder compare screen:
 └──────────────────────────────────────────────────────────┘
 ```
 
-Initial status classification:
+초기 상태 분류:
 
 ```swift
 same
@@ -416,11 +416,11 @@ typeMismatch
 error
 ```
 
-Show sync actions separately.
+sync action은 별도 표시한다.
 
 ---
 
-## 9. P1 new files
+## 9. P1 신규 파일
 
 ```text
 Sources/State/Compare/
@@ -434,14 +434,14 @@ Sources/Views/Compare/
 └── CompareStatusBadge.swift
 ```
 
-Aim for View files not to import the Core engine.
-State provides any display models they need.
+View 파일은 Core engine을 import하지 않는 것을 목표로 한다.
+필요한 display model은 State에서 제공한다.
 
 ---
 
-## 10. P1 features
+## 10. P1 기능
 
-Required:
+필수:
 - recursive
 - show/hide equal
 - show/hide left-only
@@ -453,10 +453,10 @@ Required:
 - row selection
 - selected row copy left→right
 - selected row copy right→left
-- reuse the existing confirm policy for delete actions
+- delete action은 기존 confirm 정책 재사용
 - modified text file double-click → P2 File Diff
 
-Follow-on (P3 and later):
+후속(P3 이후):
 - text regex filters
 - same-after-filter
 - 3-way directory compare
@@ -465,18 +465,18 @@ Follow-on (P3 and later):
 
 # P2 — 2-way File Diff read-only
 
-## 11. Goals
+## 11. 목표
 
-Compare two text files without editing.
+두 텍스트 파일을 편집 없이 비교한다.
 
-P2 does not merge or write.
-Focus on a read-only comparison view and diff navigation.
+P2에서는 merge/write를 하지 않는다.
+읽기 전용 비교 화면과 diff navigation에 집중한다.
 
 ---
 
-## 12. Core Diff design
+## 12. Core Diff 설계
 
-New:
+신규:
 
 ```text
 Sources/Core/Diff/
@@ -487,16 +487,16 @@ Sources/Core/Diff/
 └── TextLineTokenizer.swift
 ```
 
-In the first commit, lock the public API in `DiffEngine.swift` first.
-Split files after the implementation stabilizes.
+단, 최초 commit에서는 `DiffEngine.swift`에 public API를 먼저 고정하고,
+구현 안정화 후 파일을 분리할 수 있다.
 
 ---
 
-## 13. DiffEngine API principles
+## 13. DiffEngine API 원칙
 
-### Core does not know about the UI.
+### Core는 UI를 모른다.
 
-Wrong:
+잘못된 예:
 
 ```swift
 DiffChunk {
@@ -504,9 +504,9 @@ DiffChunk {
 }
 ```
 
-Forbidden.
+금지.
 
-Correct:
+올바른 예:
 
 ```swift
 DiffChunk {
@@ -516,9 +516,9 @@ DiffChunk {
 }
 ```
 
-Views decide colors/icons.
+색상/아이콘은 View 계층에서 결정한다.
 
-### Input
+### 입력
 
 ```swift
 DiffDocument
@@ -529,7 +529,7 @@ DiffDocument
 - lines
 - encoding metadata
 
-### Output
+### 출력
 
 ```swift
 DiffResult
@@ -542,7 +542,7 @@ DiffResult
 
 ---
 
-## 14. Diff algorithm stages
+## 14. Diff 알고리즘 단계
 
 P2 initial:
 - line-based
@@ -551,12 +551,12 @@ P2 initial:
 - no file IO inside algorithm
 - input is already decoded text/lines
 
-P2 implementation candidates:
-1. Myers O(ND) — end goal
-2. ship a correctness-first implementation first; replace with Myers later
+P2 구현 후보:
+1. Myers O(ND) — 최종 목표
+2. 초기 correctness 구현 후 Myers 교체 가능
 
-Important:
-Lock the `DiffEngine` protocol and `DiffResult` model first so algorithm swaps do not affect View/State.
+중요:
+`DiffEngine` protocol과 `DiffResult` 모델을 먼저 고정하여 알고리즘 교체가 View/State에 영향을 주지 않게 한다.
 
 ---
 
@@ -567,7 +567,7 @@ Sources/State/Compare/
 └── FileDiffState.swift
 ```
 
-Responsibilities:
+책임:
 
 ```text
 URL loading
@@ -591,24 +591,24 @@ Sources/Views/Compare/
 └── DiffOverviewMap.swift
 ```
 
-P2 is read-only.
+P2에서는 read-only.
 
-Text display implementation:
+텍스트 표시 구현:
 - AppKit `NSTextView`
 - SwiftUI `NSViewRepresentable`
 - line number
 - attributed range highlighting
 - scroll synchronization
 
-Do not use SwiftUI `TextEditor`.
+SwiftUI `TextEditor`는 사용하지 않는다.
 
 ---
 
-## 17. P2 synchronized-scroll principles
+## 17. P2 동기 스크롤 원칙
 
-Do not sync by simple scroll percentage.
+단순 scroll percentage 동기화 금지.
 
-Line mapping by Diff chunk:
+Diff chunk 기준 line mapping:
 
 ```text
 left line
@@ -620,19 +620,19 @@ right logical line
 right viewport
 ```
 
-Use the nearest stable anchor in insertion/deletion regions.
+삽입/삭제 구간에서는 nearest stable anchor를 사용한다.
 
 ---
 
-## 18. P2 tests
+## 18. P2 테스트
 
-New:
+신규:
 
 ```text
 DiffEngineTests.swift
 ```
 
-Required:
+필수:
 - empty ↔ empty
 - empty ↔ one line
 - equal files
@@ -650,18 +650,18 @@ Required:
 
 ---
 
-# 19. AppState integration principles
+# 19. AppState 통합 원칙
 
-The current `ToolSheetType`-centric structure fits simple tools,
-but Compare Workspace is a better long-term fit as an independent workspace/tab than as a sheet.
+현재 `ToolSheetType` 중심 구조는 간단한 도구에는 적합하지만,
+Compare Workspace는 장기적으로 sheet보다 독립 workspace/tab이 더 적합하다.
 
 P0~P1:
-- keep the existing sheet path compatible
+- 기존 sheet 경로 호환 유지
 
 P2:
-- consider introducing `CompareSession`
+- `CompareSession` 도입 검토
 
-Example:
+예:
 
 ```swift
 public enum CompareSessionKind {
@@ -675,11 +675,11 @@ public struct CompareSession: Identifiable {
 }
 ```
 
-Once editable diff lands in P3, move away from sheet dependence.
+P3부터 editable diff가 들어가면 반드시 sheet 의존을 제거하는 방향으로 이동한다.
 
 ---
 
-# 20. Branch strategy
+# 20. 브랜치 전략
 
 ```text
 main
@@ -689,7 +689,7 @@ main
       └─ P2 commits
 ```
 
-After P0~P2 is complete:
+P0~P2 완료 후:
 
 ```text
 feature/meld-p0-p2
@@ -697,40 +697,40 @@ feature/meld-p0-p2
 main
 ```
 
-Next plan:
+다음 계획:
 
 ```text
 main
  └─ feature/meld-p3-p4
 ```
 
-Then:
+그 다음:
 
 ```text
 main
  └─ feature/meld-p5-p6
 ```
 
-Finally:
+마지막:
 
 ```text
 main
  └─ feature/meld-p7-p8
 ```
 
-Plan documents:
+계획 문서:
 - `MELD_INTEGRATION_PLAN01.md`: P0~P2
 - `MELD_INTEGRATION_PLAN02.md`: P3~P4
 - `MELD_INTEGRATION_PLAN03.md`: P5~P6
 - `MELD_INTEGRATION_PLAN04.md`: P7~P8
 
-Write each plan document **after the previous stage is implemented and tests pass**.
+각 계획 문서는 **직전 단계 구현 및 테스트 확인 후 작성**한다.
 
 ---
 
-# 21. Commit strategy
+# 21. Commit 전략
 
-Expected:
+예상:
 
 ```text
 docs: add Meld integration plan for P0-P2
@@ -759,33 +759,33 @@ test(diff): cover two-way line diff cases
 # 22. P0~P2 Definition of Done
 
 ## P0
-- [ ] Views do not call `DirectorySyncEngine.shared` directly
-- [ ] compare / plan / execute responsibilities are split
-- [ ] metadata/content/smart modes exist
-- [ ] same-size/same-mtime/different-content tests pass
-- [ ] no regression in existing sync tests
+- [ ] View에서 `DirectorySyncEngine.shared` 직접 호출 없음
+- [ ] compare / plan / execute 책임 분리
+- [ ] metadata/content/smart 모드 존재
+- [ ] same-size/same-mtime/different-content 테스트 통과
+- [ ] 기존 sync tests 회귀 없음
 
 ## P1
-- [ ] left/right pane folder compare works
-- [ ] status filters work
-- [ ] content compare works
-- [ ] copy-direction actions work
-- [ ] UI contains no comparison algorithm
-- [ ] State owns Core calls
+- [ ] left/right pane folder compare 가능
+- [ ] 상태 필터 가능
+- [ ] content compare 가능
+- [ ] copy direction action 가능
+- [ ] UI에 비교 알고리즘 없음
+- [ ] State가 Core 호출 담당
 
 ## P2
-- [ ] two-way text diff works
-- [ ] insertion/deletion/replacement are distinguished
+- [ ] two-way text diff 가능
+- [ ] insertion/deletion/replacement 구분
 - [ ] next/previous difference
 - [ ] read-only
 - [ ] synchronized scrolling
 - [ ] overview map
-- [ ] Core does not reference SwiftUI/AppKit
-- [ ] DiffEngine unit tests pass
+- [ ] Core가 SwiftUI/AppKit 미참조
+- [ ] DiffEngine unit tests 통과
 
 ---
 
-# 23. P3~P8 planned roadmap
+# 23. P3~P8 예정 로드맵
 
 P3:
 - editable diff
@@ -820,20 +820,20 @@ P8:
 
 ---
 
-# 24. First implementation entry point
+# 24. 첫 구현 진입점
 
-P0 first-code order:
+P0 첫 코드 순서:
 
-1. `DiffEngine.swift` public model/API lock-in
+1. `DiffEngine.swift` public model/API 확정
 2. `FileComparisonMode.swift`
 3. `FileContentComparator.swift`
 4. `DirectoryCompareItem.swift`
 5. `DirectoryCompareEngine.swift`
 6. `DirectorySyncPlanner.swift`
 7. `DirectorySyncExecutor.swift`
-8. wrap existing `DirectorySyncEngine` as a facade
+8. 기존 `DirectorySyncEngine` facade화
 9. `DirectoryCompareState.swift`
-10. remove direct Core calls from `DirectorySyncSheet`
+10. `DirectorySyncSheet` 직접 Core 호출 제거
 11. tests
 
-Do not skip this order and start with the UI.
+이 순서를 벗어나 UI부터 구현하지 않는다.
