@@ -13,13 +13,13 @@
 DerivedData/
 
 # App Bundles & Build artifacts
-dist/fxfile.app/
+dist/
 bin/
 obj/
 
 # Logs & Temp
 *.log
 *.tmp
-fxfile_opt_tests_*
-fxfile_fs_tests_*
-fxfile_test_*
+abovediff_opt_tests_*
+abovediff_fs_tests_*
+abovediff_test_*

@@ -1,109 +1,120 @@
 # AboveDiff
 
 <p align="center">
-  <b>Professional Multi-Tab & Dual-Pane File Manager for macOS</b>
+  <b>Native macOS file manager with built-in compare and merge</b>
 </p>
 
 ---
 
-## 🌟 Overview
+## Overview
 
-**AboveDiff** is a fast, powerful, and versatile file manager featuring multi-tab browsing, dual-pane layout, directory tree navigation, and a comprehensive suite of power tools.
+**AboveDiff** is a native macOS application for browsing files, comparing folders and text, and resolving three-way / Git conflicts. It is built with Swift and SwiftUI / AppKit for macOS 13+.
 
 This repository contains:
-1. **`fxfile-macos`**: A brand new **native macOS application** built with **Swift 6.2 + SwiftUI / AppKit**, designed specifically for modern macOS (Ventura, Sonoma, Sequoia+).
-2. **`src/`**: The classic Windows C++ MFC source code.
+
+1. **`AboveDiff-macos`**: Native macOS application (Swift 6 / SwiftUI / AppKit).
+2. **`docs/`**: Compare / merge architecture, plans, and apply notes.
 
 ---
 
-## ✨ Features (macOS Native Edition)
+## Features
 
-### 🗂️ Core File Management
-- **Dual-Pane Layout (`Cmd + 2`)**: Horizontal and Vertical split modes. Switch focus instantly between panes using `Tab`.
-- **Multi-Tab Browsing (`Cmd + T` / `Cmd + W`)**: Independent tabs per pane with per-tab navigation history.
-- **Smart Address & Breadcrumb Bar**: Clickable breadcrumb navigation and direct path editing.
-- **Sidebar & Quick Locations**: Fast access to Home, Desktop, Documents, Downloads, Applications, Mounted Volumes, and custom Bookmarks.
-- **Finder & macOS Integration**:
-  - `Spacebar`: Native QuickLook preview.
-  - `Return` / `Enter`: Open file with default application or enter directory.
-  - `Cmd + 5`: Copy selected files to opposite pane.
-  - `Cmd + 6`: Move selected files to opposite pane.
-  - `Cmd + [` / `Cmd + ]`: Go back / forward in history.
-  - `Cmd + Up`: Enclosing folder navigation.
-  - `Cmd + Shift + .`: Toggle hidden files.
-  - `F2 ~ F8`: Classic function keys toolbar (Rename, View, Edit, Copy, Move, New Folder, Delete).
+### File management
+- Dual-pane layout (`Cmd + 2`) with horizontal and vertical split. Switch focus with `Tab`.
+- Multi-tab browsing (`Cmd + T` / `Cmd + W`) with per-tab history.
+- Address bar, breadcrumbs, sidebar locations, and bookmarks.
+- Finder integration: Quick Look (`Space`), open (`Return`), copy/move to the other pane (`Cmd + 5` / `Cmd + 6`).
 
-### 🛠️ Built-in Power Tools
-- **Batch Rename**: Rule-based renaming (Text find & replace, regex replacement with capture groups, prefix/suffix, sequential numbering with zero padding, case transformations, extension modifications) with live diff preview.
-- **Checksum Calculator & Verifier**: CRC32 (IEEE 802.3), MD5, SHA-1, SHA-256, and SHA-512 hashing with file verification and `.sfv` export.
-- **File Split & Join**: Split large files into chunked parts (`.001`, `.002`, ...) and rejoin them with checksum validation.
-- **Directory Compare & Synchronize**: Recursive differential analysis (Missing, Newer, Modified, Equal) and directional/mirror/bidirectional syncing.
-- **File Search**: Multi-criteria search by filename (wildcards/regex), size ranges, date ranges, and text content matching with line numbers.
-- **File Scrap Basket (수집함)**: Collect files from different directories into a temporary workspace for batch actions.
-- **Batch Item Creator**: Bulk create files and folders by pattern or line-by-line lists.
-- **Multi-Language Support**: English and Korean (한국어) interface.
+### Compare and merge
+- Folder compare (smart / metadata / content).
+- Two-way file diff with synchronized scroll, line numbers, filters, and sync points.
+- Three-way compare and merge (LOCAL / BASE / REMOTE).
+- Git compare (working tree, index, HEAD) and conflict resolution (OURS / BASE / THEIRS).
+
+### Built-in tools
+- Batch rename, checksum, split/join, directory sync, search, scrap basket, and batch item creation.
+- English and Korean UI.
 
 ---
 
-## 🚀 Building and Running on macOS
+## Building and running
 
 ### Prerequisites
 - macOS 13.0 or higher
 - Xcode or Command Line Tools (`swift`, `clang`)
 
-### Quick Start: One-Click Build & Package
-Run the build script in the repository root:
+### One-click build and package
 ```bash
 ./build-macos.sh
 ```
 This will:
-1. Run the entire test suite (`swift test`).
+1. Run the test suite (`swift test`).
 2. Compile the release binary with Swift Package Manager.
-3. Generate a signed `fxfile.app` bundle in `dist/fxfile.app`.
+3. Generate a signed `AboveDiff.app` bundle in `dist/AboveDiff.app`.
 
-### Launching the App
+### Launch
 ```bash
-open dist/fxfile.app
+open dist/AboveDiff.app
 ```
 
-### Running via Swift Package Manager
+### Swift Package Manager
 ```bash
-cd fxfile-macos
+cd AboveDiff-macos
 swift run
 ```
 
-### Running Tests
+### Tests
 ```bash
-cd fxfile-macos
+cd AboveDiff-macos
 swift test
 ```
 
 ---
 
-## 📂 Project Structure
+## Git mergetool
 
+The CLI mergetool name is `abovediff`:
+
+```bash
+git config --global merge.tool abovediff
+git config --global mergetool.abovediff.trustExitCode true
 ```
-.
-├── fxfile-macos/                 # macOS Native Swift/SwiftUI Port
-│   ├── Package.swift             # SPM Manifest
-│   ├── Sources/
-│   │   ├── App/                  # SwiftUI App entry & MenuBar
-│   │   ├── Core/                 # FileSystem, Checksum, BatchRename, SplitJoin, Sync, Search engines
-│   │   ├── State/                # AppState & PaneState (Observable models)
-│   │   ├── Views/                # MainWindow, PaneView, FileTableView, Sidebar, Toolbar
-│   │   │   └── Tools/            # 8 Power Tool Dialog Sheets
-│   │   └── Localization/         # English & Korean string tables
-│   ├── Tests/                    # 58 comprehensive unit tests
-│   └── Resources/                # Retina AppIcon.icns
-├── build-macos.sh                # macOS build and packaging automation script
-├── src/                          # Classic Windows C++ MFC Source Code
-├── lib/                          # Windows third-party libraries
-├── dist/                         # Distribution files and build output
-└── README.md
+
+Future CLI:
+
+```bash
+abovediff --mergetool \
+  --base "$BASE" \
+  --local "$LOCAL" \
+  --remote "$REMOTE" \
+  --merged "$MERGED"
 ```
 
 ---
 
-## 📄 License
+## Project structure
 
-This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for details.
+```
+.
+├── AboveDiff-macos/              # Native Swift/SwiftUI app
+│   ├── Package.swift
+│   ├── Sources/
+│   │   ├── App/                  # AboveDiffApp entry and menu bar
+│   │   ├── Core/                 # File system, compare, diff, merge, Git
+│   │   ├── State/                # Observable app and compare state
+│   │   ├── Views/                # Main window, panes, compare UI, tools
+│   │   └── Localization/
+│   ├── Tests/AboveDiffTests/
+│   └── Resources/
+├── build-macos.sh
+├── docs/
+└── README.md
+```
+
+Swift modules: `AboveDiffCore`, `AboveDiffLocalization`, `AboveDiffState`, `AboveDiffViews`.
+
+---
+
+## License
+
+This project is licensed under the GPLv3 License — see the [LICENSE](LICENSE) file for details.
