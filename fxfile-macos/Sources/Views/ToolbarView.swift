@@ -74,7 +74,19 @@ public struct ToolbarView: ToolbarContent {
                 Label(L10n("action.split_join"), systemImage: "scissors.circle")
             }
             .help(L10n("splitjoin.title"))
-            
+           
+        //추가중
+	Button(action: {
+	    appState.activeToolSheet = .folderCompare(
+		left: appState.leftPane.currentURL,
+		right: appState.rightPane.currentURL
+	    )
+	}) {
+	    Label("Compare Panes", systemImage: "rectangle.split.2x1")
+	}
+	.help("Compare current left and right folders")
+	.disabled(!appState.dualPaneEnabled)
+
             // Directory Sync
             Button(action: {
                 appState.activeToolSheet = .directorySync(

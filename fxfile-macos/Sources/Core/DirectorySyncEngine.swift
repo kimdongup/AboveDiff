@@ -7,7 +7,7 @@ public enum SyncStatus: String, CaseIterable, Identifiable, Sendable {
     case newerInTarget = "Newer in Target"
     case differentSize = "Different Size"
     case equal = "Equal"
-    
+
     public var id: String { rawValue }
 }
 
@@ -17,7 +17,7 @@ public enum SyncAction: String, CaseIterable, Identifiable, Sendable {
     case deleteFromTarget = "Delete from Target"
     case deleteFromSource = "Delete from Source"
     case skip = "Skip"
-    
+
     public var id: String { rawValue }
 }
 
@@ -26,7 +26,7 @@ public enum SyncDirection: String, CaseIterable, Identifiable, Sendable {
     case sourceToTargetMirror = "Source -> Target (Mirror)"
     case targetToSource = "Target -> Source"
     case bidirectional = "Two-Way Bidirectional"
-    
+
     public var id: String { rawValue }
 }
 
@@ -43,7 +43,7 @@ public struct SyncItem: Identifiable, Hashable, Sendable {
     public let targetSize: Int64?
     public let sourceDate: Date?
     public let targetDate: Date?
-    
+
     public init(
         relativePath: String,
         sourceURL: URL?,
@@ -72,13 +72,23 @@ public struct SyncItem: Identifiable, Hashable, Sendable {
     }
 }
 
+/// Compatibility facade for the original sync API.
+/// New code should use DirectoryCompareEngine -> DirectorySyncPlanner -> DirectorySyncExecutor.
 public final class DirectorySyncEngine: @unchecked Sendable {
     public static let shared = DirectorySyncEngine()
-    
-    private init() {}
-    
-    // MARK: - Compare Directories
-    
+
+    private let compareEngine: DirectoryCompareEngine
+    private let executor: DirectorySyncExecutor
+
+    public init(
+        compareEngine: DirectoryCompareEngine = .shared,
+        executor: DirectorySyncExecutor = DirectorySyncExecutor()
+    ) {
+        self.compareEngine = compareEngine
+        self.executor = executor
+    }
+
+    // Existing API preserved exactly for legacy callers/tests.
     public func compareDirectories(
         source: URL,
         target: URL,
@@ -87,187 +97,172 @@ public final class DirectorySyncEngine: @unchecked Sendable {
         compareChecksum: Bool = false,
         progress: (@Sendable (Double, String) -> Void)? = nil
     ) throws -> [SyncItem] {
-        let fm = FileManager.default
-        var sourceEntries: [String: (url: URL, isDir: Bool, size: Int64, date: Date?)] = [:]
-        var targetEntries: [String: (url: URL, isDir: Bool, size: Int64, date: Date?)] = [:]
-        
-        func scan(root: URL, storage: inout [String: (url: URL, isDir: Bool, size: Int64, date: Date?)]) {
-            let options: FileManager.DirectoryEnumerationOptions = recursive ? [.skipsHiddenFiles] : [.skipsHiddenFiles, .skipsSubdirectoryDescendants]
-            guard let enumerator = fm.enumerator(
-                at: root,
-                includingPropertiesForKeys: [.isDirectoryKey, .fileSizeKey, .contentModificationDateKey],
-                options: options
-            ) else { return }
-            
-            let rootPath = root.standardizedFileURL.path
-            for case let fileURL as URL in enumerator {
-                let filePath = fileURL.standardizedFileURL.path
-                guard filePath.hasPrefix(rootPath) else { continue }
-                var rel = String(filePath.dropFirst(rootPath.count))
-                if rel.hasPrefix("/") { rel = String(rel.dropFirst()) }
-                if rel.isEmpty { continue }
-                
-                let res = try? fileURL.resourceValues(forKeys: [.isDirectoryKey, .fileSizeKey, .contentModificationDateKey])
-                let isDir = res?.isDirectory ?? false
-                let size = Int64(res?.fileSize ?? 0)
-                let date = res?.contentModificationDate
-                storage[rel] = (url: fileURL, isDir: isDir, size: size, date: date)
-            }
-        }
-        
-        progress?(0.1, "Scanning source folder...")
-        scan(root: source, storage: &sourceEntries)
-        progress?(0.4, "Scanning target folder...")
-        scan(root: target, storage: &targetEntries)
-        
-        let allRelPaths = Set(sourceEntries.keys).union(targetEntries.keys).sorted()
-        var items: [SyncItem] = []
-        
-        let count = Double(allRelPaths.count)
-        for (i, rel) in allRelPaths.enumerated() {
-            let src = sourceEntries[rel]
-            let tgt = targetEntries[rel]
-            
-            let isDir = (src?.isDir ?? false) || (tgt?.isDir ?? false)
-            let srcURL = src?.url ?? source.appendingPathComponent(rel)
-            let tgtURL = tgt?.url ?? target.appendingPathComponent(rel)
-            
-            var status: SyncStatus
-            var action: SyncAction
-            
-            if src != nil && tgt == nil {
-                status = .missingInTarget
-                switch direction {
-                case .sourceToTargetUpdate, .sourceToTargetMirror, .bidirectional:
-                    action = .copyToTarget
-                case .targetToSource:
-                    action = .skip
-                }
-            } else if src == nil && tgt != nil {
-                status = .missingInSource
-                switch direction {
-                case .sourceToTargetMirror:
-                    action = .deleteFromTarget
-                case .bidirectional, .targetToSource:
-                    action = .copyToSource
-                case .sourceToTargetUpdate:
-                    action = .skip
-                }
-            } else if let s = src, let t = tgt {
-                if isDir {
-                    status = .equal
-                    action = .skip
-                } else {
-                    let sDate = s.date ?? Date.distantPast
-                    let tDate = t.date ?? Date.distantPast
-                    let dateDiff = sDate.timeIntervalSince(tDate)
-                    
-                    if abs(dateDiff) < 2.0 && s.size == t.size {
-                        status = .equal
-                        action = .skip
-                    } else if sDate > tDate {
-                        status = .newerInSource
-                        switch direction {
-                        case .sourceToTargetUpdate, .sourceToTargetMirror, .bidirectional:
-                            action = .copyToTarget
-                        case .targetToSource:
-                            action = .copyToSource
-                        }
-                    } else if tDate > sDate {
-                        status = .newerInTarget
-                        switch direction {
-                        case .targetToSource, .bidirectional:
-                            action = .copyToSource
-                        case .sourceToTargetUpdate, .sourceToTargetMirror:
-                            action = .copyToTarget
-                        }
-                    } else {
-                        status = .differentSize
-                        action = .copyToTarget
-                    }
-                }
-            } else {
-                status = .equal
-                action = .skip
-            }
-            
-            let item = SyncItem(
-                relativePath: rel,
-                sourceURL: src != nil ? srcURL : nil,
-                targetURL: tgt != nil ? tgtURL : nil,
-                isDirectory: isDir,
-                status: status,
-                action: action,
-                isSelected: action != .skip,
-                sourceSize: src?.size,
-                targetSize: tgt?.size,
-                sourceDate: src?.date,
-                targetDate: tgt?.date
-            )
-            items.append(item)
-            
-            if count > 0 && i % 50 == 0 {
-                progress?(0.5 + 0.5 * (Double(i) / count), "Comparing items...")
-            }
-        }
-        
-        progress?(1.0, "Comparison complete")
-        return items
+        try compareDirectoriesWithMode(
+            source: source,
+            target: target,
+            direction: direction,
+            recursive: recursive,
+            comparisonMode: compareChecksum ? .content : .metadata,
+            progress: progress
+        )
     }
-    
-    // MARK: - Execute Sync
-    
+
+    // New unambiguous API for state/UI orchestration.
+    public func compareDirectoriesWithMode(
+        source: URL,
+        target: URL,
+        direction: SyncDirection = .sourceToTargetUpdate,
+        recursive: Bool = true,
+        comparisonMode: FileComparisonMode = .smart,
+        progress: (@Sendable (Double, String) -> Void)? = nil
+    ) throws -> [SyncItem] {
+        let request = DirectoryCompareRequest(
+            leftRoot: source,
+            rightRoot: target,
+            options: DirectoryCompareOptions(
+                recursive: recursive,
+                includeHiddenFiles: false,
+                comparisonMode: comparisonMode
+            )
+        )
+
+        let compared = try compareEngine.compare(
+            request: request,
+            progress: progress
+        )
+
+        return compared.map {
+            legacyItem(from: $0, direction: direction)
+        }
+    }
+
     public func executeSync(
         items: [SyncItem],
         sourceBase: URL,
         targetBase: URL,
         progress: (@Sendable (Int, Int, String) -> Void)? = nil
     ) throws {
-        let fm = FileManager.default
-        let activeItems = items.filter { $0.isSelected && $0.action != .skip }
-        let total = activeItems.count
-        
-        for (index, item) in activeItems.enumerated() {
-            let rel = item.relativePath
-            let sURL = sourceBase.appendingPathComponent(rel)
-            let tURL = targetBase.appendingPathComponent(rel)
-            
-            progress?(index + 1, total, "\(item.action.rawValue): \(rel)")
-            
-            switch item.action {
-            case .copyToTarget:
-                let targetParent = tURL.deletingLastPathComponent()
-                if !fm.fileExists(atPath: targetParent.path) {
-                    try fm.createDirectory(at: targetParent, withIntermediateDirectories: true)
-                }
-                if fm.fileExists(atPath: tURL.path) {
-                    try fm.removeItem(at: tURL)
-                }
-                try fm.copyItem(at: sURL, to: tURL)
-                
-            case .copyToSource:
-                let sourceParent = sURL.deletingLastPathComponent()
-                if !fm.fileExists(atPath: sourceParent.path) {
-                    try fm.createDirectory(at: sourceParent, withIntermediateDirectories: true)
-                }
-                if fm.fileExists(atPath: sURL.path) {
-                    try fm.removeItem(at: sURL)
-                }
-                try fm.copyItem(at: tURL, to: sURL)
-                
-            case .deleteFromTarget:
-                if fm.fileExists(atPath: tURL.path) {
-                    try fm.removeItem(at: tURL)
-                }
-                
-            case .deleteFromSource:
-                if fm.fileExists(atPath: sURL.path) {
-                    try fm.removeItem(at: sURL)
-                }
-                
-            case .skip:
-                break
+        let operations: [DirectorySyncOperation] = items.compactMap { item in
+            guard item.isSelected, item.action != .skip else { return nil }
+
+            return DirectorySyncOperation(
+                relativePath: item.relativePath,
+                kind: operationKind(for: item.action),
+                isDirectory: item.isDirectory
+            )
+        }
+
+        try executor.execute(
+            plan: DirectorySyncPlan(operations: operations),
+            leftRoot: sourceBase,
+            rightRoot: targetBase,
+            progress: progress
+        )
+    }
+
+    private func legacyItem(
+        from item: DirectoryCompareItem,
+        direction: SyncDirection
+    ) -> SyncItem {
+        let status = legacyStatus(for: item)
+        let action = legacyAction(for: item, direction: direction)
+
+        return SyncItem(
+            relativePath: item.relativePath,
+            sourceURL: item.left?.url,
+            targetURL: item.right?.url,
+            isDirectory: item.isDirectory,
+            status: status,
+            action: action,
+            isSelected: action != .skip,
+            sourceSize: item.left?.size,
+            targetSize: item.right?.size,
+            sourceDate: item.left?.modificationDate,
+            targetDate: item.right?.modificationDate
+        )
+    }
+
+    private func legacyStatus(for item: DirectoryCompareItem) -> SyncStatus {
+        switch item.status {
+        case .same:
+            return .equal
+        case .leftOnly:
+            return .missingInTarget
+        case .rightOnly:
+            return .missingInSource
+        case .typeMismatch, .error:
+            return .differentSize
+        case .modified:
+            if let leftSize = item.left?.size,
+               let rightSize = item.right?.size,
+               leftSize != rightSize {
+                return .differentSize
             }
+
+            if let leftDate = item.left?.modificationDate,
+               let rightDate = item.right?.modificationDate {
+                return leftDate >= rightDate ? .newerInSource : .newerInTarget
+            }
+
+            return .differentSize
+        }
+    }
+
+    private func legacyAction(
+        for item: DirectoryCompareItem,
+        direction: SyncDirection
+    ) -> SyncAction {
+        switch item.status {
+        case .same, .error, .typeMismatch:
+            return .skip
+
+        case .leftOnly:
+            switch direction {
+            case .sourceToTargetUpdate, .sourceToTargetMirror, .bidirectional:
+                return .copyToTarget
+            case .targetToSource:
+                return .skip
+            }
+
+        case .rightOnly:
+            switch direction {
+            case .sourceToTargetMirror:
+                return .deleteFromTarget
+            case .targetToSource, .bidirectional:
+                return .copyToSource
+            case .sourceToTargetUpdate:
+                return .skip
+            }
+
+        case .modified:
+            switch direction {
+            case .sourceToTargetUpdate, .sourceToTargetMirror:
+                return .copyToTarget
+            case .targetToSource:
+                return .copyToSource
+            case .bidirectional:
+                if let leftDate = item.left?.modificationDate,
+                   let rightDate = item.right?.modificationDate,
+                   rightDate > leftDate {
+                    return .copyToSource
+                }
+                return .copyToTarget
+            }
+        }
+    }
+
+    private func operationKind(for action: SyncAction) -> DirectorySyncOperationKind {
+        switch action {
+        case .copyToTarget:
+            return .copyLeftToRight
+        case .copyToSource:
+            return .copyRightToLeft
+        case .deleteFromTarget:
+            return .deleteRight
+        case .deleteFromSource:
+            return .deleteLeft
+        case .skip:
+            preconditionFailure("skip actions must be filtered before execution")
         }
     }
 }

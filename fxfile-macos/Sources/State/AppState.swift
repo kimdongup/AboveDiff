@@ -26,7 +26,8 @@ public enum ToolSheetType: Identifiable, Equatable {
     case batchCreate(parent: URL)
     case fileProperties(file: FileItem)
     case preferences
-    
+    case folderCompare(left: URL?, right: URL?)
+
     public var id: String {
         switch self {
         case .batchRename: return "batchRename"
@@ -38,6 +39,7 @@ public enum ToolSheetType: Identifiable, Equatable {
         case .batchCreate: return "batchCreate"
         case .fileProperties: return "fileProperties"
         case .preferences: return "preferences"
+        case .folderCompare: return "folderCompare"
         }
     }
     

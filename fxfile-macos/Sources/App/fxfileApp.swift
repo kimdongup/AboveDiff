@@ -6,6 +6,9 @@ import fxfileViews
 
 @main
 struct fxfileApp: App {
+    @NSApplicationDelegateAdaptor(AppLifecycleDelegate.self)
+    private var appDelegate
+
     @StateObject private var appState = AppState()
     @ObservedObject private var locManager = LocalizationManager.shared
     
@@ -272,6 +275,50 @@ struct fxfileApp: App {
                     appState.activeToolSheet = .batchCreate(parent: appState.activePane.currentURL)
                 }
                 .keyboardShortcut("n", modifiers: [.command, .control])
+
+		Button("Compare Folders") {
+		    appState.activeToolSheet = .folderCompare(
+			left: appState.leftPane.currentURL,
+			right: appState.rightPane.currentURL
+		    )
+		}
+		.keyboardShortcut("d", modifiers: [.command, .shift])
+
+		Button("Compare Selected Files") {
+		    guard
+			let left = appState.leftPane.selectedFiles.first,
+			let right = appState.rightPane.selectedFiles.first,
+			!left.isDirectory,
+			!right.isDirectory
+		    else { return }
+
+		    FileDiffWindowPresenter.open(
+			leftURL: left.url,
+			rightURL: right.url
+		    )
+		}
+		.disabled(
+		    appState.leftPane.selectedFiles.count != 1 ||
+		    appState.rightPane.selectedFiles.count != 1
+		)
+
+		Divider()
+
+		Button("Three-Way Compare…") {
+		    ThreeWayCompareLauncher.openCompare()
+		}
+		.keyboardShortcut(
+		    "3",
+		    modifiers: [.command, .option]
+		)
+
+		Button("Three-Way Merge…") {
+		    ThreeWayCompareLauncher.openMerge()
+		}
+		.keyboardShortcut(
+		    "m",
+		    modifiers: [.command, .option, .shift]
+		)
             }
             
             // App Preferences
