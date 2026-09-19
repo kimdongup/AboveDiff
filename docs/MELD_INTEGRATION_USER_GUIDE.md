@@ -1,4 +1,4 @@
-# FX File Compare / Merge User Guide
+# AboveDiff Compare / Merge User Guide
 
 ## Folder Compare
 Compare left/right folders using Smart, Metadata, or Content mode.
@@ -43,9 +43,28 @@ Available comparisons:
 ## Resolve Git Conflict
 For a conflicted file:
 1. Open Resolve Git Conflict.
-2. FX File loads OURS / BASE / THEIRS.
+2. AboveDiff loads OURS / BASE / THEIRS.
 3. Resolve all conflicts.
 4. Save to Working Tree.
 5. Optionally choose Stage as Resolved.
 
 Stage as Resolved runs `git add` only after explicit user action.
+
+## Git mergetool
+
+The mergetool name is `abovediff`.
+
+```bash
+git config --global merge.tool abovediff
+git config --global mergetool.abovediff.trustExitCode true
+```
+
+Future CLI:
+
+```bash
+abovediff --mergetool \
+  --base "$BASE" \
+  --local "$LOCAL" \
+  --remote "$REMOTE" \
+  --merged "$MERGED"
+```

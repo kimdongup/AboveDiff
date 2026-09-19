@@ -15,8 +15,8 @@ Views:
 - Sources/Views/Git/GitConflictMergeWindowPresenter.swift
 
 Tests:
-- Tests/fxfileTests/GitSelectionCapabilitiesTests.swift
-- Tests/fxfileTests/GitConflictServiceTests.swift
+- Tests/AboveDiffTests/GitSelectionCapabilitiesTests.swift
+- Tests/AboveDiffTests/GitConflictServiceTests.swift
 
 ## Replace
 
@@ -26,7 +26,7 @@ Tests:
 
 1. Select conflicted working-tree file.
 2. Resolve Git Conflict…
-3. FX File loads:
+3. AboveDiff loads:
    - stage 2 = OURS / LOCAL
    - stage 1 = BASE
    - stage 3 = THEIRS / REMOTE
@@ -40,7 +40,7 @@ No automatic staging is performed.
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

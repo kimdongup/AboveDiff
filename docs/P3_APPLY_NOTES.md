@@ -3,21 +3,21 @@
 ## New files
 
 ```text
-fxfile-macos/Sources/Core/Diff/TextDocumentService.swift
-fxfile-macos/Sources/Core/Diff/DiffEditOperation.swift
-fxfile-macos/Sources/Core/Diff/DiffEditEngine.swift
-fxfile-macos/Sources/State/Compare/EditableFileDiffState.swift
-fxfile-macos/Sources/Views/Compare/EditableDiffTextPane.swift
-fxfile-macos/Sources/Views/Compare/DiffActionGutter.swift
-fxfile-macos/Tests/fxfileTests/DiffEditEngineTests.swift
-fxfile-macos/Tests/fxfileTests/TextDocumentServiceTests.swift
+AboveDiff-macos/Sources/Core/Diff/TextDocumentService.swift
+AboveDiff-macos/Sources/Core/Diff/DiffEditOperation.swift
+AboveDiff-macos/Sources/Core/Diff/DiffEditEngine.swift
+AboveDiff-macos/Sources/State/Compare/EditableFileDiffState.swift
+AboveDiff-macos/Sources/Views/Compare/EditableDiffTextPane.swift
+AboveDiff-macos/Sources/Views/Compare/DiffActionGutter.swift
+AboveDiff-macos/Tests/AboveDiffTests/DiffEditEngineTests.swift
+AboveDiff-macos/Tests/AboveDiffTests/TextDocumentServiceTests.swift
 ```
 
 ## Replace completely
 
 ```text
-fxfile-macos/Sources/Views/Compare/FileDiffView.swift
-fxfile-macos/Sources/Views/Compare/FileDiffWindowPresenter.swift
+AboveDiff-macos/Sources/Views/Compare/FileDiffView.swift
+AboveDiff-macos/Sources/Views/Compare/FileDiffWindowPresenter.swift
 ```
 
 Do not merge those two replacement files line by line.
@@ -25,7 +25,7 @@ Do not merge those two replacement files line by line.
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

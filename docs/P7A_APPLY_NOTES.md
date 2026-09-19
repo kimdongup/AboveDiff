@@ -29,7 +29,7 @@ Sources/Views/Git/
 ## New Tests
 
 ```text
-Tests/fxfileTests/
+Tests/AboveDiffTests/
 ├── GitRepositoryServiceTests.swift
 └── GitBlobLoaderTests.swift
 ```
@@ -51,7 +51,7 @@ Tests/fxfileTests/
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

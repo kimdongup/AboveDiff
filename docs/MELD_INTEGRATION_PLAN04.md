@@ -18,7 +18,7 @@ P8: Finalization / UX / Performance / Regression / Release Readiness
 
 ## 목표
 
-FX File 내부에서 Git 작업 중 필요한 비교/병합 진입점을 제공한다.
+AboveDiff 내부에서 Git 작업 중 필요한 비교/병합 진입점을 제공한다.
 
 지원 대상:
 - working tree vs HEAD

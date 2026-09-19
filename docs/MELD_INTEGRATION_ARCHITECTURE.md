@@ -1,4 +1,4 @@
-# FX File Compare / Merge Architecture
+# AboveDiff Compare / Merge Architecture
 
 ## Dependency direction
 

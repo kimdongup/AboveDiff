@@ -2,10 +2,10 @@
 
 ## 0. 목적
 
-이 문서는 `fxfile` macOS 네이티브 앱에 Meld의 핵심 비교 기능을 **Swift/SwiftUI/AppKit 네이티브 구조로 흡수**하기 위한 P0~P2 실행 계획이다.
+이 문서는 `AboveDiff` macOS 네이티브 앱에 Meld의 핵심 비교 기능을 **Swift/SwiftUI/AppKit 네이티브 구조로 흡수**하기 위한 P0~P2 실행 계획이다.
 
 대상 저장소:
-- `kimdongup/fxfile`
+- `kimdongup/AboveDiff`
 - 기준 브랜치: `main`
 - 작업 브랜치: `feature/meld-p0-p2`
 
@@ -93,10 +93,10 @@ Core → View/Window 상태 참조
 ### 2.1 현재 macOS 구조
 
 ```text
-fxfile-macos/
+AboveDiff-macos/
 ├── Sources/
 │   ├── App/
-│   │   └── fxfileApp.swift
+│   │   └── AboveDiffApp.swift
 │   ├── Core/
 │   │   ├── BatchRenameEngine.swift
 │   │   ├── ChecksumService.swift
@@ -115,7 +115,7 @@ fxfile-macos/
 │       ├── ToolbarView.swift
 │       └── Tools/
 │           └── DirectorySyncSheet.swift
-└── Tests/fxfileTests/
+└── Tests/AboveDiffTests/
     ├── DirectorySyncTests.swift
     └── StateTests.swift
 ```
@@ -333,7 +333,7 @@ P0 변경:
 신규:
 
 ```text
-Tests/fxfileTests/
+Tests/AboveDiffTests/
 ├── FileContentComparatorTests.swift
 ├── DirectoryCompareEngineTests.swift
 ├── DirectorySyncPlannerTests.swift
@@ -364,7 +364,7 @@ Tests/fxfileTests/
 
 ## 7. 목표
 
-Meld 스타일의 폴더 비교 기능을 FX File의 dual-pane workflow에 통합한다.
+Meld 스타일의 폴더 비교 기능을 AboveDiff의 dual-pane workflow에 통합한다.
 
 입력 기본값:
 

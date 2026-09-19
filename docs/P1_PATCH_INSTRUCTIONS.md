@@ -70,7 +70,7 @@ No Package.swift modification is required.
 ## 5. Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

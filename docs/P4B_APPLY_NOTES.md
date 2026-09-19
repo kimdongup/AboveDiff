@@ -12,29 +12,29 @@ Adds:
 ## New files
 
 ```text
-fxfile-macos/Sources/Core/Diff/DiffPerformance.swift
-fxfile-macos/Sources/Core/Directory/DirectoryNameFilter.swift
-fxfile-macos/Sources/Views/Compare/SyncPointSummaryBar.swift
-fxfile-macos/Tests/fxfileTests/DirectoryNameFilterTests.swift
-fxfile-macos/Tests/fxfileTests/DiffPerformanceTests.swift
+AboveDiff-macos/Sources/Core/Diff/DiffPerformance.swift
+AboveDiff-macos/Sources/Core/Directory/DirectoryNameFilter.swift
+AboveDiff-macos/Sources/Views/Compare/SyncPointSummaryBar.swift
+AboveDiff-macos/Tests/AboveDiffTests/DirectoryNameFilterTests.swift
+AboveDiff-macos/Tests/AboveDiffTests/DiffPerformanceTests.swift
 ```
 
 ## Replace completely
 
 ```text
-fxfile-macos/Sources/Core/Diff/DiffEngine.swift
-fxfile-macos/Sources/Core/Directory/DirectoryCompareOptions.swift
-fxfile-macos/Sources/Core/Directory/DirectoryCompareEngine.swift
-fxfile-macos/Sources/State/Compare/FolderCompareState.swift
-fxfile-macos/Sources/Views/Compare/DiffOptionsSheet.swift
-fxfile-macos/Sources/Views/Compare/FileDiffView.swift
-fxfile-macos/Sources/Views/Compare/FolderCompareView.swift
+AboveDiff-macos/Sources/Core/Diff/DiffEngine.swift
+AboveDiff-macos/Sources/Core/Directory/DirectoryCompareOptions.swift
+AboveDiff-macos/Sources/Core/Directory/DirectoryCompareEngine.swift
+AboveDiff-macos/Sources/State/Compare/FolderCompareState.swift
+AboveDiff-macos/Sources/Views/Compare/DiffOptionsSheet.swift
+AboveDiff-macos/Sources/Views/Compare/FileDiffView.swift
+AboveDiff-macos/Sources/Views/Compare/FolderCompareView.swift
 ```
 
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

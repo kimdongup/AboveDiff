@@ -46,5 +46,5 @@ Button("Resolve Git Conflict…") {
 )
 ```
 
-The exact active-pane selection hook should use the existing FX File pane selection mechanism.
+The exact active-pane selection hook should use the existing AboveDiff pane selection mechanism.
 Do not duplicate pane-selection state inside the Git subsystem.

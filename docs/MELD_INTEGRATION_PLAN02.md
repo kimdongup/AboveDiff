@@ -10,7 +10,7 @@
 기준:
 - P0~P2 테스트 통과
 - UI → State → Core 의존 방향 유지
-- `fxfileCore`는 SwiftUI/AppKit 비의존
+- `AboveDiffCore`는 SwiftUI/AppKit 비의존
 - View에서 파일 시스템/merge 로직 직접 수행 금지
 
 ---

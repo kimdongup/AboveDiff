@@ -10,26 +10,26 @@ This is the first P4 implementation slice:
 ## New files
 
 ```text
-fxfile-macos/Sources/Core/Diff/DiffFilter.swift
-fxfile-macos/Sources/Core/Diff/DiffSyncPoint.swift
-fxfile-macos/Sources/Core/Diff/TextNormalizer.swift
-fxfile-macos/Sources/Views/Compare/DiffOptionsSheet.swift
-fxfile-macos/Tests/fxfileTests/TextNormalizerTests.swift
-fxfile-macos/Tests/fxfileTests/DiffOptionsTests.swift
+AboveDiff-macos/Sources/Core/Diff/DiffFilter.swift
+AboveDiff-macos/Sources/Core/Diff/DiffSyncPoint.swift
+AboveDiff-macos/Sources/Core/Diff/TextNormalizer.swift
+AboveDiff-macos/Sources/Views/Compare/DiffOptionsSheet.swift
+AboveDiff-macos/Tests/AboveDiffTests/TextNormalizerTests.swift
+AboveDiff-macos/Tests/AboveDiffTests/DiffOptionsTests.swift
 ```
 
 ## Replace completely
 
 ```text
-fxfile-macos/Sources/Core/Diff/DiffEngine.swift
-fxfile-macos/Sources/State/Compare/EditableFileDiffState.swift
-fxfile-macos/Sources/Views/Compare/FileDiffView.swift
+AboveDiff-macos/Sources/Core/Diff/DiffEngine.swift
+AboveDiff-macos/Sources/State/Compare/EditableFileDiffState.swift
+AboveDiff-macos/Sources/Views/Compare/FileDiffView.swift
 ```
 
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

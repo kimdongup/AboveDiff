@@ -1,6 +1,6 @@
-# fxfileApp.swift menu patch
+# AboveDiffApp.swift menu patch
 
-`fxfileApp.swift`의 `CommandMenu("Tools")` 안에서 기존 Compare 메뉴들 근처에 아래 두 버튼을 추가하세요.
+`AboveDiffApp.swift`의 `CommandMenu("Tools")` 안에서 기존 Compare 메뉴들 근처에 아래 두 버튼을 추가하세요.
 
 ```swift
 Divider()
@@ -25,10 +25,10 @@ Button("Three-Way Merge…") {
 필요 import:
 
 ```swift
-import fxfileViews
+import AboveDiffViews
 ```
 
-이미 `fxfileViews`를 import하고 있으면 추가할 필요 없습니다.
+이미 `AboveDiffViews`를 import하고 있으면 추가할 필요 없습니다.
 
 권장 Tools 순서:
 

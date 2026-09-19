@@ -16,19 +16,19 @@ Classification:
 ## New files
 
 ```text
-fxfile-macos/Sources/Core/Diff3/ThreeWayDiffChunk.swift
-fxfile-macos/Sources/Core/Diff3/ThreeWayDiffResult.swift
-fxfile-macos/Sources/Core/Diff3/ThreeWayDiffOptions.swift
-fxfile-macos/Sources/Core/Diff3/ThreeWayDiffEngine.swift
+AboveDiff-macos/Sources/Core/Diff3/ThreeWayDiffChunk.swift
+AboveDiff-macos/Sources/Core/Diff3/ThreeWayDiffResult.swift
+AboveDiff-macos/Sources/Core/Diff3/ThreeWayDiffOptions.swift
+AboveDiff-macos/Sources/Core/Diff3/ThreeWayDiffEngine.swift
 
-fxfile-macos/Sources/State/Compare/ThreeWayDiffState.swift
+AboveDiff-macos/Sources/State/Compare/ThreeWayDiffState.swift
 
-fxfile-macos/Sources/Views/Compare/ThreeWayTextPane.swift
-fxfile-macos/Sources/Views/Compare/ThreeWayOverviewMap.swift
-fxfile-macos/Sources/Views/Compare/ThreeWayDiffView.swift
-fxfile-macos/Sources/Views/Compare/ThreeWayDiffWindowPresenter.swift
+AboveDiff-macos/Sources/Views/Compare/ThreeWayTextPane.swift
+AboveDiff-macos/Sources/Views/Compare/ThreeWayOverviewMap.swift
+AboveDiff-macos/Sources/Views/Compare/ThreeWayDiffView.swift
+AboveDiff-macos/Sources/Views/Compare/ThreeWayDiffWindowPresenter.swift
 
-fxfile-macos/Tests/fxfileTests/ThreeWayDiffEngineTests.swift
+AboveDiff-macos/Tests/AboveDiffTests/ThreeWayDiffEngineTests.swift
 ```
 
 No existing source file needs to be replaced for the initial P5 implementation.
@@ -36,7 +36,7 @@ No existing source file needs to be replaced for the initial P5 implementation.
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

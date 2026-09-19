@@ -23,14 +23,14 @@ Therefore `DirectorySyncEngine.swift` must be REPLACED, not merged line-by-line.
 
 Replace these three files completely:
 
-1. `fxfile-macos/Sources/Core/DirectorySyncEngine.swift`
-2. `fxfile-macos/Sources/Core/Directory/DirectorySyncExecutor.swift`
-3. `fxfile-macos/Sources/Core/Directory/DirectorySyncPlanner.swift`
+1. `AboveDiff-macos/Sources/Core/DirectorySyncEngine.swift`
+2. `AboveDiff-macos/Sources/Core/Directory/DirectorySyncExecutor.swift`
+3. `AboveDiff-macos/Sources/Core/Directory/DirectorySyncPlanner.swift`
 
 Then clean and test:
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

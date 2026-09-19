@@ -12,7 +12,7 @@ Views:
 - Sources/Views/Compare/CompareWindowRegistry.swift
 
 Tests:
-- Tests/fxfileTests/TextFileGuardTests.swift
+- Tests/AboveDiffTests/TextFileGuardTests.swift
 
 Docs:
 - MELD_INTEGRATION_ARCHITECTURE.md
@@ -41,7 +41,7 @@ Docs:
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 

@@ -32,7 +32,7 @@ Sources/Views/Compare/
 ## New tests
 
 ```text
-Tests/fxfileTests/
+Tests/AboveDiffTests/
 └── ThreeWayMergeEngineTests.swift
 ```
 
@@ -41,7 +41,7 @@ No existing file replacement is required.
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 ```

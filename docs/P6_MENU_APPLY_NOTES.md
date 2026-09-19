@@ -9,13 +9,13 @@ Sources/Views/Compare/ThreeWayCompareLauncher.swift
 
 ## Manual edit
 
-`Sources/App/fxfileApp.swift` 또는 현재 app entry 파일의 Tools menu에
-`FXFILEAPP_MENU_PATCH.md` 내용을 추가합니다.
+`Sources/App/AboveDiffApp.swift` 또는 현재 app entry 파일의 Tools menu에
+`ABOVEDIFFAPP_MENU_PATCH.md` 내용을 추가합니다.
 
 ## Test
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 swift run

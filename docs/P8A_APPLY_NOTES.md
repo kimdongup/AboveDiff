@@ -30,7 +30,7 @@ independent in P8A; P8B can share the same scroll group there if desired.
 ## Verify
 
 ```bash
-cd /Users/kimdongup/Bazel/fxfile/fxfile-macos
+cd /Users/kimdongup/Bazel/AboveDiff/AboveDiff-macos
 rm -rf .build
 swift test
 swift run

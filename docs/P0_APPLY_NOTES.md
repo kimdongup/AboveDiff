@@ -5,7 +5,7 @@ Copy the contents of this bundle into the repository root, preserving paths.
 Then run:
 
 ```bash
-cd fxfile-macos
+cd AboveDiff-macos
 swift test
 ```
 
