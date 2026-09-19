@@ -44,7 +44,7 @@ public func L10n(_ key: String) -> String {
 private let localizedStrings: [AppLanguage: [String: String]] = [
     .english: [
         // App
-        "app.name": "fxfile",
+        "app.name": "AboveDiff",
         "app.tagline": "Advanced Dual-Pane File Manager for macOS",
         
         // Navigation & Menu
@@ -56,8 +56,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "menu.window": "Window",
         "menu.help": "Help",
         "menu.preferences": "Preferences...",
-        "menu.about": "About fxfile",
-        "menu.quit": "Quit fxfile",
+        "menu.about": "About AboveDiff",
+        "menu.quit": "Quit AboveDiff",
         
         // Actions
         "action.open": "Open",
@@ -285,7 +285,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
     ],
     .korean: [
         // App
-        "app.name": "fxfile",
+        "app.name": "AboveDiff",
         "app.tagline": "macOS용 고급 듀얼 패널 파일 관리자",
         
         // Navigation & Menu
@@ -297,8 +297,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "menu.window": "윈도우",
         "menu.help": "도움말",
         "menu.preferences": "환경설정...",
-        "menu.about": "fxfile 정보",
-        "menu.quit": "fxfile 종료",
+        "menu.about": "AboveDiff 정보",
+        "menu.quit": "AboveDiff 종료",
         
         // Actions
         "action.open": "열기",

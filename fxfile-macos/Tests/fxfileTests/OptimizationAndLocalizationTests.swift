@@ -82,7 +82,7 @@ final class OptimizationAndLocalizationTests: XCTestCase {
         let loc = LocalizationManager.shared
         
         loc.currentLanguage = .english
-        XCTAssertEqual(L10n("app.name"), "fxfile")
+        XCTAssertEqual(L10n("app.name"), "AboveDiff")
         XCTAssertEqual(L10n("action.open"), "Open")
         XCTAssertEqual(L10n("action.copy"), "Copy")
         XCTAssertEqual(L10n("action.delete"), "Delete")
@@ -91,7 +91,7 @@ final class OptimizationAndLocalizationTests: XCTestCase {
         XCTAssertEqual(L10n("fkey.f7"), "F7 NewFolder")
         
         loc.currentLanguage = .korean
-        XCTAssertEqual(L10n("app.name"), "fxfile")
+        XCTAssertEqual(L10n("app.name"), "AboveDiff")
         XCTAssertEqual(L10n("action.open"), "열기")
         XCTAssertEqual(L10n("action.copy"), "복사")
         XCTAssertEqual(L10n("action.delete"), "삭제")

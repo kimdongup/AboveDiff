@@ -138,7 +138,7 @@ private final class GitTestFixture {
                 root.path,
                 "config",
                 "user.name",
-                "FX File Tests"
+                "AboveDiff Tests"
             ],
             currentDirectory: nil,
             allowFailure: false

@@ -1,4 +1,4 @@
-# fxfile (flyExplorer)
+# AboveDiff
 
 <p align="center">
   <b>Professional Multi-Tab & Dual-Pane File Manager for macOS</b>
@@ -8,7 +8,7 @@
 
 ## 🌟 Overview
 
-**fxfile** (originally *flyExplorer*) is a fast, powerful, and versatile file manager featuring multi-tab browsing, dual-pane layout, directory tree navigation, and a comprehensive suite of power tools.
+**AboveDiff** is a fast, powerful, and versatile file manager featuring multi-tab browsing, dual-pane layout, directory tree navigation, and a comprehensive suite of power tools.
 
 This repository contains:
 1. **`fxfile-macos`**: A brand new **native macOS application** built with **Swift 6.2 + SwiftUI / AppKit**, designed specifically for modern macOS (Ventura, Sonoma, Sequoia+).
