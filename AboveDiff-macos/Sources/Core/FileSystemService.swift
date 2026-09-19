@@ -9,6 +9,8 @@ public struct VolumeItem: Identifiable, Hashable, Sendable {
     public let freeSpace: Int64
     public let isRemovable: Bool
     public let isRoot: Bool
+    public let isLocal: Bool
+    public let isInternal: Bool
     
     public init(
         id: String,
@@ -17,7 +19,9 @@ public struct VolumeItem: Identifiable, Hashable, Sendable {
         totalSpace: Int64,
         freeSpace: Int64,
         isRemovable: Bool,
-        isRoot: Bool
+        isRoot: Bool,
+        isLocal: Bool = true,
+        isInternal: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -26,6 +30,18 @@ public struct VolumeItem: Identifiable, Hashable, Sendable {
         self.freeSpace = freeSpace
         self.isRemovable = isRemovable
         self.isRoot = isRoot
+        self.isLocal = isLocal
+        self.isInternal = isInternal
+    }
+    
+    public var systemImageName: String {
+        if !isLocal {
+            return "network"
+        }
+        if isRoot || isInternal {
+            return "internaldrive.fill"
+        }
+        return "externaldrive.fill"
     }
     
     public var formattedFreeSpace: String {
@@ -261,31 +277,52 @@ public final class FileSystemService: @unchecked Sendable {
         var results: [VolumeItem] = []
         let keys: [URLResourceKey] = [
             .volumeNameKey,
+            .volumeLocalizedNameKey,
             .volumeIsRemovableKey,
             .volumeIsRootFileSystemKey,
+            .volumeIsBrowsableKey,
+            .volumeIsLocalKey,
+            .volumeIsInternalKey,
             .volumeTotalCapacityKey,
             .volumeAvailableCapacityForImportantUsageKey
         ]
         
-        if let urls = fileManager.mountedVolumeURLs(includingResourceValuesForKeys: keys, options: []) {
-            for url in urls {
-                guard let res = try? url.resourceValues(forKeys: Set(keys)) else { continue }
-                let name = res.volumeName ?? url.lastPathComponent
-                let total = Int64(res.volumeTotalCapacity ?? 0)
-                let free = Int64(res.volumeAvailableCapacityForImportantUsage ?? 0)
-                let isRemovable = res.volumeIsRemovable ?? false
-                let isRoot = res.volumeIsRootFileSystem ?? false
-                
-                results.append(VolumeItem(
-                    id: url.path,
-                    name: name,
-                    url: url,
-                    totalSpace: total,
-                    freeSpace: free,
-                    isRemovable: isRemovable,
-                    isRoot: isRoot
-                ))
-            }
+        // Match Finder's Locations: skip hidden system volumes (Preboot, VM, Data, Time Machine snapshots, cryptex, etc.)
+        let urls = fileManager.mountedVolumeURLs(
+            includingResourceValuesForKeys: keys,
+            options: [.skipHiddenVolumes]
+        ) ?? []
+        
+        for url in urls {
+            guard let res = try? url.resourceValues(forKeys: Set(keys)) else { continue }
+            if res.volumeIsBrowsable == false { continue }
+            
+            let name = res.volumeLocalizedName ?? res.volumeName ?? url.lastPathComponent
+            let total = Int64(res.volumeTotalCapacity ?? 0)
+            let free = Int64(res.volumeAvailableCapacityForImportantUsage ?? 0)
+            let isRemovable = res.volumeIsRemovable ?? false
+            let isRoot = res.volumeIsRootFileSystem ?? false
+            let isLocal = res.volumeIsLocal ?? true
+            let isInternal = res.volumeIsInternal ?? false
+            
+            results.append(VolumeItem(
+                id: url.path,
+                name: name,
+                url: url,
+                totalSpace: total,
+                freeSpace: free,
+                isRemovable: isRemovable,
+                isRoot: isRoot,
+                isLocal: isLocal,
+                isInternal: isInternal
+            ))
+        }
+        
+        results.sort { lhs, rhs in
+            if lhs.isRoot != rhs.isRoot { return lhs.isRoot }
+            if lhs.isLocal != rhs.isLocal { return lhs.isLocal }
+            if lhs.isInternal != rhs.isInternal { return lhs.isInternal }
+            return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
         }
         
         return results

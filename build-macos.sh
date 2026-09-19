@@ -42,10 +42,44 @@ mkdir -p "$RESOURCES_DIR"
 cp "$RELEASE_BIN" "$MACOS_BIN_DIR/AboveDiff"
 chmod +x "$MACOS_BIN_DIR/AboveDiff"
 
-# Copy Resources if available
-if [ -f "$MACOS_DIR/Resources/AppIcon.icns" ]; then
-    echo "==> Copying AppIcon.icns..."
-    cp "$MACOS_DIR/Resources/AppIcon.icns" "$RESOURCES_DIR/AppIcon.icns"
+ICON_PNG="$PROJECT_ROOT/assets/AboveDiffIcon.png"
+ICON_ICNS="$PROJECT_ROOT/assets/AboveDiffIcon.icns"
+APP_ICON="$MACOS_DIR/Resources/AppIcon.icns"
+
+echo "==> Building AppIcon.icns from assets..."
+mkdir -p "$MACOS_DIR/Resources"
+if [ -f "$ICON_PNG" ]; then
+    ICONSET="$(mktemp -d)/AppIcon.iconset"
+    mkdir -p "$ICONSET"
+    for spec in \
+        "icon_16x16.png:16" \
+        "icon_16x16@2x.png:32" \
+        "icon_32x32.png:32" \
+        "icon_32x32@2x.png:64" \
+        "icon_128x128.png:128" \
+        "icon_128x128@2x.png:256" \
+        "icon_256x256.png:256" \
+        "icon_256x256@2x.png:512" \
+        "icon_512x512.png:512" \
+        "icon_512x512@2x.png:1024"
+    do
+        name="${spec%%:*}"
+        size="${spec##*:}"
+        sips -z "$size" "$size" "$ICON_PNG" --out "$ICONSET/$name" >/dev/null
+    done
+    iconutil -c icns "$ICONSET" -o "$APP_ICON"
+    cp "$APP_ICON" "$ICON_ICNS"
+    rm -rf "$(dirname "$ICONSET")"
+elif [ -f "$ICON_ICNS" ]; then
+    cp "$ICON_ICNS" "$APP_ICON"
+fi
+
+if [ -f "$APP_ICON" ]; then
+    echo "==> Copying AppIcon.icns into the app bundle..."
+    cp "$APP_ICON" "$RESOURCES_DIR/AppIcon.icns"
+else
+    echo "Error: App icon not found in assets/ or Resources/"
+    exit 1
 fi
 
 # Create Info.plist

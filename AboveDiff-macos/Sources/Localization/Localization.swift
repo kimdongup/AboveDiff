@@ -127,6 +127,10 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "sidebar.music": "Music",
         "sidebar.movies": "Movies",
         "sidebar.trash": "Trash",
+        "sidebar.computer": "Computer",
+        "sidebar.network": "Network",
+        "sidebar.add_favorite": "Add Current to Favorites",
+        "sidebar.remove_favorite": "Remove from Favorites",
         "sidebar.add_bookmark": "Add Current to Bookmarks",
         "sidebar.remove_bookmark": "Remove Bookmark",
         
@@ -368,6 +372,10 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "sidebar.music": "음악",
         "sidebar.movies": "동영상",
         "sidebar.trash": "휴지통",
+        "sidebar.computer": "컴퓨터",
+        "sidebar.network": "네트워크",
+        "sidebar.add_favorite": "현재 위치를 즐겨찾기에 추가",
+        "sidebar.remove_favorite": "즐겨찾기에서 제거",
         "sidebar.add_bookmark": "현재 위치 북마크 추가",
         "sidebar.remove_bookmark": "북마크 삭제",
         

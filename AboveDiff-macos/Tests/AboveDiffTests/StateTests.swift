@@ -137,22 +137,23 @@ final class StateTests: XCTestCase {
         XCTAssertTrue(appState.inactivePane === appState.leftPane)
     }
     
-    func testAppStateBookmarks() {
+    func testAppStateFavorites() {
         let appState = AppState()
-        let initialCount = appState.bookmarks.count
+        XCTAssertTrue(appState.favorites.isEmpty)
         
-        // Add bookmark
-        let newURL = URL(fileURLWithPath: "/tmp/my_bookmark")
-        appState.addBookmark(name: "My Bookmark", url: newURL)
-        XCTAssertEqual(appState.bookmarks.count, initialCount + 1)
+        let newURL = URL(fileURLWithPath: "/tmp/my_favorite")
+        appState.addFavorite(name: "My Favorite", url: newURL)
+        XCTAssertEqual(appState.favorites.count, 1)
         
-        let added = appState.bookmarks.last!
-        XCTAssertEqual(added.name, "My Bookmark")
-        XCTAssertEqual(added.url, newURL)
+        let added = appState.favorites.last!
+        XCTAssertEqual(added.name, "My Favorite")
+        XCTAssertEqual(added.url.standardizedFileURL, newURL.standardizedFileURL)
         
-        // Remove bookmark
-        appState.removeBookmark(id: added.id)
-        XCTAssertEqual(appState.bookmarks.count, initialCount)
+        appState.addFavorite(name: "Duplicate", url: newURL)
+        XCTAssertEqual(appState.favorites.count, 1)
+        
+        appState.removeFavorite(id: added.id)
+        XCTAssertTrue(appState.favorites.isEmpty)
     }
     
     func testAppStateFileScrapBasket() throws {

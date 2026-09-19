@@ -58,7 +58,7 @@ public final class AppState: ObservableObject {
     @Published public var rightPane: PaneState
     
     @Published public var fileScrapItems: [FileItem] = []
-    @Published public var bookmarks: [BookmarkItem] = []
+    @Published public var favorites: [BookmarkItem] = []
     
     @Published public var activeToolSheet: ToolSheetType? = nil
     
@@ -96,28 +96,6 @@ public final class AppState: ObservableObject {
         
         self.leftPane = PaneState(initialURL: home)
         self.rightPane = PaneState(initialURL: docs)
-        
-        loadDefaultBookmarks()
-    }
-    
-    private func loadDefaultBookmarks() {
-        let fm = FileManager.default
-        var defaults: [BookmarkItem] = []
-        
-        let home = fm.homeDirectoryForCurrentUser
-        defaults.append(BookmarkItem(name: "Home", url: home))
-        
-        if let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
-            defaults.append(BookmarkItem(name: "Documents", url: docs))
-        }
-        if let downloads = fm.urls(for: .downloadsDirectory, in: .userDomainMask).first {
-            defaults.append(BookmarkItem(name: "Downloads", url: downloads))
-        }
-        if let desktop = fm.urls(for: .desktopDirectory, in: .userDomainMask).first {
-            defaults.append(BookmarkItem(name: "Desktop", url: desktop))
-        }
-        
-        self.bookmarks = defaults
     }
     
     // MARK: - Pane Switching & Operations
@@ -222,14 +200,18 @@ public final class AppState: ObservableObject {
         }
     }
     
-    // MARK: - Bookmarks
+    // MARK: - Favorites
     
-    public func addBookmark(name: String, url: URL) {
-        bookmarks.append(BookmarkItem(name: name, url: url))
+    public func addFavorite(name: String, url: URL) {
+        let standardized = url.standardizedFileURL
+        guard !favorites.contains(where: { $0.url.standardizedFileURL == standardized }) else { return }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayName = trimmed.isEmpty ? (standardized.lastPathComponent.isEmpty ? standardized.path : standardized.lastPathComponent) : trimmed
+        favorites.append(BookmarkItem(name: displayName, url: standardized))
     }
     
-    public func removeBookmark(id: UUID) {
-        bookmarks.removeAll { $0.id == id }
+    public func removeFavorite(id: UUID) {
+        favorites.removeAll { $0.id == id }
     }
     
     // MARK: - Clipboard Operations

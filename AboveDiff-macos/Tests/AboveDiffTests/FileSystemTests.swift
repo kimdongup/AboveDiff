@@ -191,4 +191,20 @@ final class FileSystemTests: XCTestCase {
         XCTAssertFalse(space.formattedTotal.isEmpty)
         XCTAssertFalse(space.formattedFree.isEmpty)
     }
+    
+    func testListVolumesMatchesFinderVisibleLocations() {
+        let volumes = service.listVolumes()
+        XCTAssertFalse(volumes.isEmpty)
+        XCTAssertTrue(volumes.contains(where: { $0.isRoot }), "Finder Locations always includes the startup disk")
+        
+        for vol in volumes {
+            XCTAssertFalse(vol.url.path.hasPrefix("/System/Volumes"), "Hidden system volume listed: \(vol.url.path)")
+            XCTAssertFalse(vol.url.path.contains("/.timemachine"), "Time Machine snapshot listed: \(vol.url.path)")
+            XCTAssertFalse(vol.url.path.contains("cryptexd"), "Cryptex mount listed: \(vol.url.path)")
+        }
+        
+        if let rootIndex = volumes.firstIndex(where: { $0.isRoot }) {
+            XCTAssertEqual(rootIndex, 0, "Startup disk should sort first, matching Finder Locations")
+        }
+    }
 }
