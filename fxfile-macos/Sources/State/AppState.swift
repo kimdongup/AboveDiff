@@ -1,8 +1,8 @@
 import Foundation
 import SwiftUI
 import AppKit
-import fxfileCore
-import fxfileLocalization
+import AboveDiffCore
+import AboveDiffLocalization
 
 public struct BookmarkItem: Identifiable, Hashable, Codable, Sendable {
     public let id: UUID

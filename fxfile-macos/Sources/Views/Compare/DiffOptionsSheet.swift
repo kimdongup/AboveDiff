@@ -1,6 +1,6 @@
 import SwiftUI
-import fxfileCore
-import fxfileState
+import AboveDiffCore
+import AboveDiffState
 
 @MainActor
 public struct DiffOptionsSheet: View {

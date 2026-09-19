@@ -1,11 +1,11 @@
 import SwiftUI
-import fxfileCore
-import fxfileLocalization
-import fxfileState
-import fxfileViews
+import AboveDiffCore
+import AboveDiffLocalization
+import AboveDiffState
+import AboveDiffViews
 
 @main
-struct fxfileApp: App {
+struct AboveDiffApp: App {
     @NSApplicationDelegateAdaptor(AppLifecycleDelegate.self)
     private var appDelegate
 

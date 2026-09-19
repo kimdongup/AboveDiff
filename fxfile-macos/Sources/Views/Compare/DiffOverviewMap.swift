@@ -1,5 +1,5 @@
 import SwiftUI
-import fxfileCore
+import AboveDiffCore
 
 public struct DiffOverviewMap: View {
     public let result: DiffResult

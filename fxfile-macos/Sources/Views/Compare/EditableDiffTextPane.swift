@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import fxfileCore
+import AboveDiffCore
 
 public struct EditableDiffTextPane: NSViewRepresentable {
     public let text: String

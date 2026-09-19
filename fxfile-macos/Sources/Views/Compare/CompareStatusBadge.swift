@@ -1,5 +1,5 @@
 import SwiftUI
-import fxfileCore
+import AboveDiffCore
 
 public struct CompareStatusBadge: View {
     let status: DirectoryCompareStatus

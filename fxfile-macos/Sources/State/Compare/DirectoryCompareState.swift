@@ -1,5 +1,5 @@
 import Foundation
-import fxfileCore
+import AboveDiffCore
 
 @MainActor
 public final class DirectoryCompareState: ObservableObject {

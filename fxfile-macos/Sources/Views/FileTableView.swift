@@ -1,8 +1,8 @@
 import SwiftUI
 import AppKit
-import fxfileCore
-import fxfileLocalization
-import fxfileState
+import AboveDiffCore
+import AboveDiffLocalization
+import AboveDiffState
 
 @MainActor
 public struct FileTableView: NSViewRepresentable {

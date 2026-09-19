@@ -1,6 +1,6 @@
 import SwiftUI
-import fxfileCore
-import fxfileLocalization
+import AboveDiffCore
+import AboveDiffLocalization
 
 @MainActor
 public struct FilePropertiesSheet: View {

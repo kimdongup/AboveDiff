@@ -1,5 +1,5 @@
 import XCTest
-@testable import fxfileCore
+@testable import AboveDiffCore
 
 final class FileSystemTests: XCTestCase {
     var tempDirectory: URL!

@@ -1,5 +1,5 @@
 import SwiftUI
-import fxfileCore
+import AboveDiffCore
 
 public struct DiffActionGutter: View {
     public let currentChange: DiffChunk?

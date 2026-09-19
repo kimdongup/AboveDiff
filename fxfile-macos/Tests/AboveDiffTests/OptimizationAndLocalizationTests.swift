@@ -1,7 +1,7 @@
 import XCTest
-@testable import fxfileCore
-@testable import fxfileLocalization
-@testable import fxfileState
+@testable import AboveDiffCore
+@testable import AboveDiffLocalization
+@testable import AboveDiffState
 
 final class OptimizationAndLocalizationTests: XCTestCase {
     var tempDirectory: URL!

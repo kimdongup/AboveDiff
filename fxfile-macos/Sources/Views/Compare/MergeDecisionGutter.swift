@@ -1,5 +1,5 @@
 import SwiftUI
-import fxfileCore
+import AboveDiffCore
 
 public struct MergeDecisionGutter: View {
     public let hasConflict: Bool

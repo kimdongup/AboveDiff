@@ -1,7 +1,7 @@
 import SwiftUI
-import fxfileCore
-import fxfileLocalization
-import fxfileState
+import AboveDiffCore
+import AboveDiffLocalization
+import AboveDiffState
 
 @MainActor
 public struct ChecksumSheet: View {

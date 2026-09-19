@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
-import fxfileCore
-import fxfileLocalization
+import AboveDiffCore
+import AboveDiffLocalization
 
 public enum FileViewMode: String, CaseIterable, Identifiable, Codable {
     case detailsTable

@@ -1,5 +1,5 @@
 import SwiftUI
-import fxfileCore
+import AboveDiffCore
 
 public struct SyncPointSummaryBar: View {
     public let points: [DiffSyncPoint]

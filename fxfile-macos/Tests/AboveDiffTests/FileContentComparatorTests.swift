@@ -1,5 +1,5 @@
 import XCTest
-@testable import fxfileCore
+@testable import AboveDiffCore
 
 final class FileContentComparatorTests: XCTestCase {
     private var tempDirectory: URL!

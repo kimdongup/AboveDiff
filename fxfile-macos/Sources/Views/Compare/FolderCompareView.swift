@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
-import fxfileCore
-import fxfileState
+import AboveDiffCore
+import AboveDiffState
 
 @MainActor
 public struct FolderCompareView: View {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import fxfileCore
+@testable import AboveDiffCore
 
 final class FileSplitJoinTests: XCTestCase {
     var tempDirectory: URL!

@@ -1,6 +1,6 @@
 import Foundation
 import AppKit
-import fxfileCore
+import AboveDiffCore
 
 @MainActor
 public enum GitCompareLauncher {

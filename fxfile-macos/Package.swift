@@ -2,49 +2,49 @@
 import PackageDescription
 
 let package = Package(
-    name: "fxfile",
+    name: "AboveDiff",
     defaultLocalization: "en",
     platforms: [
         .macOS(.v13)
     ],
     products: [
-        .executable(name: "fxfile", targets: ["fxfile"]),
-        .library(name: "fxfileCore", targets: ["fxfileCore"]),
-        .library(name: "fxfileLocalization", targets: ["fxfileLocalization"]),
-        .library(name: "fxfileState", targets: ["fxfileState"]),
-        .library(name: "fxfileViews", targets: ["fxfileViews"])
+        .executable(name: "AboveDiff", targets: ["AboveDiff"]),
+        .library(name: "AboveDiffCore", targets: ["AboveDiffCore"]),
+        .library(name: "AboveDiffLocalization", targets: ["AboveDiffLocalization"]),
+        .library(name: "AboveDiffState", targets: ["AboveDiffState"]),
+        .library(name: "AboveDiffViews", targets: ["AboveDiffViews"])
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "fxfileCore",
+            name: "AboveDiffCore",
             dependencies: [],
             path: "Sources/Core"
         ),
         .target(
-            name: "fxfileLocalization",
+            name: "AboveDiffLocalization",
             dependencies: [],
             path: "Sources/Localization"
         ),
         .target(
-            name: "fxfileState",
-            dependencies: ["fxfileCore", "fxfileLocalization"],
+            name: "AboveDiffState",
+            dependencies: ["AboveDiffCore", "AboveDiffLocalization"],
             path: "Sources/State"
         ),
         .target(
-            name: "fxfileViews",
-            dependencies: ["fxfileCore", "fxfileLocalization", "fxfileState"],
+            name: "AboveDiffViews",
+            dependencies: ["AboveDiffCore", "AboveDiffLocalization", "AboveDiffState"],
             path: "Sources/Views"
         ),
         .executableTarget(
-            name: "fxfile",
-            dependencies: ["fxfileCore", "fxfileLocalization", "fxfileState", "fxfileViews"],
+            name: "AboveDiff",
+            dependencies: ["AboveDiffCore", "AboveDiffLocalization", "AboveDiffState", "AboveDiffViews"],
             path: "Sources/App"
         ),
         .testTarget(
-            name: "fxfileTests",
-            dependencies: ["fxfileCore", "fxfileLocalization", "fxfileState"],
-            path: "Tests/fxfileTests"
+            name: "AboveDiffTests",
+            dependencies: ["AboveDiffCore", "AboveDiffLocalization", "AboveDiffState"],
+            path: "Tests/AboveDiffTests"
         )
     ]
 )

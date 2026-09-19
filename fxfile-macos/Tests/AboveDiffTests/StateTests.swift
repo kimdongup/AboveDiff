@@ -1,6 +1,6 @@
 import XCTest
-@testable import fxfileCore
-@testable import fxfileState
+@testable import AboveDiffCore
+@testable import AboveDiffState
 
 @MainActor
 final class StateTests: XCTestCase {
